@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/drawer_group_essential"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/nav_all_notes"
+            android:icon="@drawable/ic_view_list"
+            android:title="All Notes" />
+        <item
+            android:id="@+id/nav_calendar"
+            android:icon="@drawable/ic_date_range"
+            android:title="Calendar" />
+        <item
+            android:id="@+id/nav_alarm"
+            android:icon="@drawable/ic_alarm"
+            android:title="Alarm" />
+    </group>
+    <group
+        android:id="@+id/drawer_group_utilities"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings" />
+        <item
+            android:id="@+id/nav_help_and_feedback"
+            android:icon="@drawable/ic_feedback"
+            android:title="Send Feedback" />
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info"
+            android:title="About" />
+    </group>
+
+</menu>
