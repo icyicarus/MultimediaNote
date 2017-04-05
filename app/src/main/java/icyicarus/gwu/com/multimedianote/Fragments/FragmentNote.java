@@ -12,17 +12,18 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.ListViewCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -30,14 +31,17 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import icyicarus.gwu.com.multimedianote.BuildConfig;
 import icyicarus.gwu.com.multimedianote.FontManager;
-import icyicarus.gwu.com.multimedianote.MediaList.MediaAdapter;
+import icyicarus.gwu.com.multimedianote.MediaList.AdapterMediaList;
 import icyicarus.gwu.com.multimedianote.MediaList.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 
 import static android.app.Activity.RESULT_OK;
+import static icyicarus.gwu.com.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_AUDIO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_PHOTO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_VIDEO;
 
 public class FragmentNote extends Fragment {
     @BindView(R.id.fragment_note_edit_text_title) EditText fragmentNoteEditTextTitle;
@@ -46,11 +50,9 @@ public class FragmentNote extends Fragment {
     @BindView(R.id.button_note_add_photo) AppCompatButton buttonNoteAddPhoto;
     @BindView(R.id.button_note_add_video) AppCompatButton buttonNoteAddVideo;
     @BindView(R.id.button_note_add_audio) AppCompatButton buttonNoteAddAudio;
-    @BindView(R.id.fragment_note_media_list) ListViewCompat mediaList;
+    @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;
 
-    private final String FILE_PROVIDER_AUTHORITIES = BuildConfig.APPLICATION_ID + ".Fragments.FragmentNote";
-
-    private MediaAdapter adapter;
+    private ArrayList<MediaListCellData> mediaListData = null;
     private File f;
 
     @Override
@@ -64,38 +66,11 @@ public class FragmentNote extends Fragment {
         ButterKnife.bind(this, v);
         Typeface iconFont = FontManager.getTypeface(getContext(), FontManager.FONT_AWESOME);
         FontManager.markAsIconContainer(v.findViewById(R.id.container_note_view), iconFont);
-        adapter = new MediaAdapter(getContext());
-        mediaList.setAdapter(adapter);
-        mediaList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MediaListCellData data = adapter.getItem(position);
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Uri uri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", new File(data.path));
 
-                switch (data.type) {
-                    case 8001:
-//                        uri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", new File(data.path));
-                        i.setDataAndType(uri, "image/jpg");
-//                        startActivity(i);
-                        break;
-                    case 8002:
-//                        uri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", new File(data.path));
-                        i.setDataAndType(uri, "video/mp4");
-//                        startActivity(i);
-                        break;
-                    case 8003:
-//                        uri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", new File(data.path));
-                        i.setDataAndType(uri, "audio/wav");
-//                        startActivity(i);
-                        break;
-                    default:
-                        break;
-                }
-                startActivity(i);
-            }
-        });
+        Logger.e("fragment onCreateView");
+        mediaListData = new ArrayList<>();
+        mediaList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mediaList.setAdapter(new AdapterMediaList(getContext(), mediaListData));
         return v;
     }
 
@@ -105,13 +80,8 @@ public class FragmentNote extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroyView() {
+        super.onDestroyView();
         SQLiteDatabase writeDatabase;
         writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         ContentValues noteContent = new ContentValues();
@@ -140,7 +110,7 @@ public class FragmentNote extends Fragment {
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 i.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
                 i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(i, 8001);
+                startActivityForResult(i, MEDIA_TYPE_PHOTO);
                 break;
             case R.id.button_note_add_video:
                 f = new File(Environment.getExternalStorageDirectory(), "/temp/" + System.currentTimeMillis() + ".jpg");
@@ -149,7 +119,7 @@ public class FragmentNote extends Fragment {
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 i.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
                 i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(i, 8002);
+                startActivityForResult(i, MEDIA_TYPE_VIDEO);
                 break;
             case R.id.button_note_add_audio:
                 Logger.d("button note add audio");
@@ -161,19 +131,20 @@ public class FragmentNote extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Logger.e("fragment onactivityresult");
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 8000:
                 break;
-            case 8001:
+            case MEDIA_TYPE_PHOTO:
+            case MEDIA_TYPE_VIDEO:
+            case MEDIA_TYPE_AUDIO:
                 if (resultCode != RESULT_OK) return;
                 else {
-                    adapter.add(new MediaListCellData(f.getAbsolutePath()));
-                    adapter.notifyDataSetChanged();
-                    Logger.e(adapter.getCount() + " ");
+                    mediaListData.add(new MediaListCellData(f.getAbsolutePath()));
+                    Logger.e("media added");
+                    mediaList.getAdapter().notifyDataSetChanged();
                 }
-                break;
-            case 8002:
                 break;
             default:
                 break;

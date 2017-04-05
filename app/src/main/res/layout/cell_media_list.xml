@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/media_cell_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
-    <ImageView
-        android:id="@+id/imageViewMediaCellIcon"
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/media_cell_image"
         android:layout_width="100dp"
-        android:layout_height="75dp" />
+        android:layout_height="75dp"/>
 
-    <TextView
-        android:id="@+id/textViewMediaCellPath"
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/media_cell_path"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 
-</LinearLayout>
+</android.support.v7.widget.LinearLayoutCompat>
