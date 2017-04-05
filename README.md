@@ -3,7 +3,7 @@
 **04/04/2017**
 <br>
 *DONE*<br>
-重写了MediaList的适配器，添加元素后可以正确显示
+重写了MediaList的适配器，添加元素后可以正确显示<br>
 *TODO*<br>
 完善NoteFragment的逻辑，包括保存删除等
 
