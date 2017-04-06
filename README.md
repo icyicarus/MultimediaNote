@@ -3,10 +3,10 @@
 **04/05/2017**
 <br>
 *DONE*<br>
-实现了Note里添加Media的逻辑
+实现了Note里添加Media的逻辑<br>
 使用Fresco加载图片<br>
 *TODO*<br>
-重绘NoteList的Card，因Fresco不支持百分比布局
+重绘NoteList的Card，因Fresco不支持百分比布局<br>
 实现删除Media的逻辑
 
 **04/04/2017**
