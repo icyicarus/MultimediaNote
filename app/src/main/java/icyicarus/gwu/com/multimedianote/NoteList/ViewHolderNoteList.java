@@ -4,15 +4,15 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.facebook.drawee.view.DraweeView;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.FontManager;
-import icyicarus.gwu.com.multimedianote.NoteContent;
 import icyicarus.gwu.com.multimedianote.R;
 
 /**
@@ -21,7 +21,7 @@ import icyicarus.gwu.com.multimedianote.R;
 
 public class ViewHolderNoteList extends RecyclerView.ViewHolder {
     @BindView(R.id.note_content_block) PercentRelativeLayout noteContentBlock;
-    @BindView(R.id.note_photo) AppCompatImageView notePhoto;
+    @BindView(R.id.note_photo) DraweeView notePhoto;
     @BindView(R.id.note_title) AppCompatTextView noteTitle;
     @BindView(R.id.note_date) AppCompatTextView noteDate;
     @BindView(R.id.note_description) AppCompatTextView noteDescription;

@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.squareup.leakcanary.LeakCanary;
 
 import butterknife.BindView;
@@ -40,6 +41,7 @@ public class UserInterface extends AppCompatActivity implements NavigationView.O
 
         setContentView(R.layout.activity_user_interface);
         ButterKnife.bind(this);
+        Fresco.initialize(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

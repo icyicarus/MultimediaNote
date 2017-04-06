@@ -13,14 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import icyicarus.gwu.com.multimedianote.NoteContent;
+import icyicarus.gwu.com.multimedianote.MediaList.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.NoteList.NoteContent;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.NoteList.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.R;
+import icyicarus.gwu.com.multimedianote.Variables;
 
 /**
  * Created by Icarus on 1/1/2017.
@@ -41,6 +44,7 @@ public class FragmentAllNotes extends Fragment {
     void clearButtonClick() {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, null, null);
+        writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, null, null);
         noteList.getAdapter().notifyDataSetChanged();
     }
 
@@ -55,16 +59,26 @@ public class FragmentAllNotes extends Fragment {
         ArrayList<NoteContent> query = new ArrayList<>();
         SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
         Cursor c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, null, null, null, null, null, null);
+        Cursor cc;
         while (c.moveToNext()) {
-//            String sb = c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)) +
-//                    "#*#" +
-//                    c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT));
+            String picturePath = null;
+            LinkedList<MediaListCellData> mediaList = new LinkedList<>();
+            cc = readDatabase.query(NoteDB.TABLE_NAME_MEDIA, null, "owner=?", new String[]{c.getInt(c.getColumnIndex(NoteDB.COLUMN_ID)) + ""}, null, null, null, null);
+            while (cc.moveToNext()) {
+                MediaListCellData media = new MediaListCellData(cc.getLong(cc.getColumnIndex(NoteDB.COLUMN_ID)), cc.getString(cc.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH)));
+                if (media.type == Variables.MEDIA_TYPE_PHOTO)
+                    picturePath = media.path;
+                mediaList.add(media);
+            }
             query.add(new NoteContent(
-                    c.getInt(c.getColumnIndex(NoteDB.COLUMN_ID)),
+                    c.getLong(c.getColumnIndex(NoteDB.COLUMN_ID)),
                     c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)),
                     c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_DATE)),
-                    c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT))
+                    c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT)),
+                    mediaList,
+                    picturePath
             ));
+            cc.close();
         }
         c.close();
         readDatabase.close();

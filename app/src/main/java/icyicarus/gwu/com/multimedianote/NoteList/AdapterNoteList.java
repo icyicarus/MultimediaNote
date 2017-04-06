@@ -1,8 +1,11 @@
 package icyicarus.gwu.com.multimedianote.NoteList;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +13,12 @@ import android.view.ViewGroup;
 
 import com.orhanobut.logger.Logger;
 
+import java.io.File;
 import java.util.List;
 
-import icyicarus.gwu.com.multimedianote.NoteContent;
+import icyicarus.gwu.com.multimedianote.Fragments.FragmentNote;
 import icyicarus.gwu.com.multimedianote.R;
+import icyicarus.gwu.com.multimedianote.Variables;
 
 /**
  * Created by IcarusXu on 3/3/2017.
@@ -38,10 +43,14 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
     @Override
     public void onBindViewHolder(final ViewHolderNoteList holder, int position) {
         final NoteContent noteContent = notes.get(position);
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), noteContent.getPicture(), getBitmapOption(4));
-//        holder.notePhoto.setImageBitmap(bitmap);
+        final Bundle bundle = new Bundle();
+        bundle.putSerializable("NOTE_DATA", noteContent);
+        if (noteContent.getPicturePath() != null) {
+            Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(noteContent.getPicturePath()));
+            holder.notePhoto.setImageURI(uri);
+        }
         holder.noteTitle.setText(noteContent.getTitle());
-//        holder.noteDate.setText(noteContent.getDate());
+        holder.noteDate.setText(noteContent.getDate());
         holder.noteDescription.setText(noteContent.getContent());
         holder.setTag(noteContent);
         holder.buttonShare.setOnClickListener(new View.OnClickListener() {
@@ -62,17 +71,18 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
                 Logger.e("");
             }
         });
+        holder.buttonEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = new FragmentNote();
+                fragment.setArguments(bundle);
+                ((FragmentActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment).addToBackStack(null).commit();
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return notes.size();
-    }
-
-    private BitmapFactory.Options getBitmapOption(int size) {
-        System.gc();
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = size;
-        return options;
     }
 }

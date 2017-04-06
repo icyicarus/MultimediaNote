@@ -7,7 +7,12 @@
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
-    <android.support.v7.widget.AppCompatImageView
+    <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/media_cell_image"-->
+    <!--android:layout_width="100dp"-->
+    <!--android:layout_height="75dp"/>-->
+
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/media_cell_image"
         android:layout_width="100dp"
         android:layout_height="75dp"/>

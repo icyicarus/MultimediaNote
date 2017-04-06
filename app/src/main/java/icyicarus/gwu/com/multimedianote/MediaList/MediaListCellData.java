@@ -1,11 +1,14 @@
 package icyicarus.gwu.com.multimedianote.MediaList;
 
-import icyicarus.gwu.com.multimedianote.R;
+import java.io.Serializable;
 
-public class MediaListCellData {
+import icyicarus.gwu.com.multimedianote.R;
+import icyicarus.gwu.com.multimedianote.Variables;
+
+public class MediaListCellData implements Serializable {
 
     public int type = 0;
-    public int id = -1;
+    public long id = -1;
     public String path = null;
     public int iconID = R.drawable.logo;
 
@@ -14,17 +17,17 @@ public class MediaListCellData {
 
         if (path.endsWith(".jpg")) {
             iconID = R.drawable.img_photo;
-            type = 8001;
+            type = Variables.MEDIA_TYPE_PHOTO;
         } else if (path.endsWith(".mp4")) {
             iconID = R.drawable.img_video;
-            type = 8002;
+            type = Variables.MEDIA_TYPE_VIDEO;
         } else if (path.endsWith(".wav")) {
             iconID = R.drawable.img_audio;
-            type = 8003;
+            type = Variables.MEDIA_TYPE_AUDIO;
         }
     }
 
-    public MediaListCellData(String path, int id) {
+    public MediaListCellData(long id, String path) {
         this(path);
         this.id = id;
     }

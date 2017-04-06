@@ -1,7 +1,6 @@
 package icyicarus.gwu.com.multimedianote.Fragments;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
@@ -23,8 +22,8 @@ import com.orhanobut.logger.Logger;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -35,6 +34,7 @@ import icyicarus.gwu.com.multimedianote.FontManager;
 import icyicarus.gwu.com.multimedianote.MediaList.AdapterMediaList;
 import icyicarus.gwu.com.multimedianote.MediaList.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.NoteDB;
+import icyicarus.gwu.com.multimedianote.NoteList.NoteContent;
 import icyicarus.gwu.com.multimedianote.R;
 
 import static android.app.Activity.RESULT_OK;
@@ -52,12 +52,16 @@ public class FragmentNote extends Fragment {
     @BindView(R.id.button_note_add_audio) AppCompatButton buttonNoteAddAudio;
     @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;
 
-    private ArrayList<MediaListCellData> mediaListData = null;
+    private LinkedList<MediaListCellData> mediaListData = null;
     private File f;
+
+    private NoteContent noteData = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null)
+            noteData = (NoteContent) getArguments().getSerializable("NOTE_DATA");
     }
 
     @Override
@@ -66,32 +70,55 @@ public class FragmentNote extends Fragment {
         ButterKnife.bind(this, v);
         Typeface iconFont = FontManager.getTypeface(getContext(), FontManager.FONT_AWESOME);
         FontManager.markAsIconContainer(v.findViewById(R.id.container_note_view), iconFont);
+        if (noteData != null) {
+            ((EditText) v.findViewById(R.id.fragment_note_edit_text_title)).setText(noteData.getTitle());
+            ((EditText) v.findViewById(R.id.fragment_note_edit_text_content)).setText(noteData.getContent());
+            mediaListData = noteData.getMediaList();
+        } else
+            mediaListData = new LinkedList<>();
 
-        Logger.e("fragment onCreateView");
-        mediaListData = new ArrayList<>();
         mediaList.setLayoutManager(new LinearLayoutManager(getActivity()));
         mediaList.setAdapter(new AdapterMediaList(getContext(), mediaListData));
         return v;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
-        SQLiteDatabase writeDatabase;
-        writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
+        SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         ContentValues noteContent = new ContentValues();
-        if (Objects.equals(fragmentNoteEditTextTitle.getText().toString(), "")) {
-            String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Created on " + date);
-        } else
+
+        if (Objects.equals(fragmentNoteEditTextTitle.getText().toString(), ""))
+            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Created on " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+        else
             noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, fragmentNoteEditTextTitle.getText().toString());
+        noteContent.put(NoteDB.COLUMN_NAME_NOTE_DATE, noteData != null ? noteData.getDate() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
         noteContent.put(NoteDB.COLUMN_NAME_NOTE_CONTENT, fragmentNoteEditTextContent.getText().toString());
-        writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, noteContent);
+
+        if (noteData == null) { // New
+            noteData = new NoteContent(
+                    writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, noteContent),
+                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_TITLE),
+                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_DATE),
+                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_CONTENT),
+                    mediaListData,
+                    null);
+        } else { // Old
+            noteContent.put(NoteDB.COLUMN_ID, noteData.getId());
+            writeDatabase.update(NoteDB.TABLE_NAME_NOTES, noteContent, "_id=?", new String[]{noteData.getId() + ""});
+        }
+
+        if (mediaListData.size() > 0) {
+            for (MediaListCellData media : mediaListData) {
+                if (media.id == -1) {
+                    ContentValues mediaContent = new ContentValues();
+                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
+                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, noteData.getId());
+                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, mediaContent);
+                }
+            }
+        }
+
         writeDatabase.close();
     }
 
@@ -131,7 +158,6 @@ public class FragmentNote extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Logger.e("fragment onactivityresult");
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 8000:
