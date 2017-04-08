@@ -3,13 +3,13 @@
 ### 04/07/2017
 
 ##### DONE
-重绘了NoteList的Card，可以使用Fresco异步加载图片<br>
-通过简单逻辑实现了Note内无图片时不显示图片框<br>
-在RecyclerView的适配器内添加接口，实现了Note和Media的删除逻辑<br>
+* 重绘了NoteList的Card，可以使用Fresco异步加载图片
+* 通过简单逻辑实现了Note内无图片时不显示图片框
+* 在RecyclerView的适配器内添加接口，实现了Note和Media的删除逻辑
 ##### TODO
-实现Share功能<br>
-尝试使用RecyclerView的添加删除动画<br>
-尝试将旧的定位功能移植进来
+* 实现Share功能
+* 尝试使用RecyclerView的添加删除动画
+* 尝试将旧的定位功能移植进来
 
 ### 04/05/2017
 ##### DONE
