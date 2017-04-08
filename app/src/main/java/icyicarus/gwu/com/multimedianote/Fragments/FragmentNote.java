@@ -3,11 +3,14 @@ package icyicarus.gwu.com.multimedianote.Fragments;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.AppCompatButton;
@@ -51,6 +54,7 @@ public class FragmentNote extends Fragment {
     @BindView(R.id.button_note_add_video) AppCompatButton buttonNoteAddVideo;
     @BindView(R.id.button_note_add_audio) AppCompatButton buttonNoteAddAudio;
     @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;
+    @BindView(R.id.snackbar_container_note) CoordinatorLayout snackbarContainer;
 
     private LinkedList<MediaListCellData> mediaListData = null;
     private File f;
@@ -78,8 +82,36 @@ public class FragmentNote extends Fragment {
             mediaListData = new LinkedList<>();
 
         mediaList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mediaList.setAdapter(new AdapterMediaList(getContext(), mediaListData));
+        AdapterMediaList adapterMediaList = new AdapterMediaList(getContext(), mediaListData);
+        adapterMediaList.setOnMediaDeleteListener(new AdapterMediaList.deleteMediaListener() {
+            @Override
+            public void onMediaDeleteListener(MediaListCellData media) {
+                mediaListData.remove(media);
+                mediaList.getAdapter().notifyDataSetChanged();
+                deleteMedia(media);
+            }
+        });
+        mediaList.setAdapter(adapterMediaList);
         return v;
+    }
+
+    private void deleteMedia(MediaListCellData media) {
+        SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
+        writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, "_id=?", new String[]{media.id + ""});
+        writeDatabase.close();
+        File file = new File(media.path);
+        final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
+        snackbar.setAction("OK", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                snackbar.dismiss();
+            }
+        }).setActionTextColor(Color.WHITE);
+        if (file.delete())
+            snackbar.setText("File deleted");
+        else
+            snackbar.setText("File not deleted, please delete it manually");
+        snackbar.show();
     }
 
     @Override
@@ -168,7 +200,6 @@ public class FragmentNote extends Fragment {
                 if (resultCode != RESULT_OK) return;
                 else {
                     mediaListData.add(new MediaListCellData(f.getAbsolutePath()));
-                    Logger.e("media added");
                     mediaList.getAdapter().notifyDataSetChanged();
                 }
                 break;

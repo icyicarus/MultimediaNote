@@ -1,14 +1,13 @@
 package icyicarus.gwu.com.multimedianote.MediaList;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.orhanobut.logger.Logger;
 
 import java.io.File;
 import java.util.List;
@@ -24,6 +23,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
 
     private Context context;
     private List<MediaListCellData> mediaList;
+    private deleteMediaListener deleteListener = null;
 
     public AdapterMediaList(Context context, List<MediaListCellData> mediaList) {
         this.context = context;
@@ -37,7 +37,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderMediaList holder, int position) {
+    public void onBindViewHolder(final ViewHolderMediaList holder, int position) {
         final MediaListCellData mediaListCellData = mediaList.get(position);
         Uri uri;
         if (mediaListCellData.type == Variables.MEDIA_TYPE_PHOTO)
@@ -52,7 +52,31 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
         holder.mediaCellContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Logger.e("cell click");
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaListCellData.path));
+                switch (mediaListCellData.type) {
+                    case Variables.MEDIA_TYPE_PHOTO:
+                        i.setDataAndType(uri, "image/jpg");
+                        break;
+                    case Variables.MEDIA_TYPE_VIDEO:
+                        i.setDataAndType(uri, "video/mp4");
+                        break;
+                    case Variables.MEDIA_TYPE_AUDIO:
+                        i.setDataAndType(uri, "audio/wav");
+                        break;
+                    default:
+                        break;
+                }
+                context.startActivity(i);
+            }
+        });
+
+        holder.mediaCellContainer.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                deleteListener.onMediaDeleteListener(mediaListCellData);
+                return true;
             }
         });
     }
@@ -60,5 +84,13 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     @Override
     public int getItemCount() {
         return mediaList.size();
+    }
+
+    public interface deleteMediaListener {
+        void onMediaDeleteListener(MediaListCellData media);
+    }
+
+    public void setOnMediaDeleteListener(deleteMediaListener listener) {
+        this.deleteListener = listener;
     }
 }

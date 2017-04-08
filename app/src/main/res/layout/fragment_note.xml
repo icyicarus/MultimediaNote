@@ -4,7 +4,6 @@
     android:id="@+id/container_note_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="5dp"
     android:orientation="vertical"
     tools:context="icyicarus.gwu.com.multimedianote.Fragments.FragmentNote">
 
@@ -97,4 +96,9 @@
             android:text="&#xf03d;"/>
     </android.support.v7.widget.LinearLayoutCompat>
 
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/snackbar_container_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

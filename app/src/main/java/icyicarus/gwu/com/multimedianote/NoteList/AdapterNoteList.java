@@ -28,6 +28,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
 
     private Context context;
     private List<NoteContent> notes;
+    private deleteNoteListener deleteListener;
 
     public AdapterNoteList(Context context, List<NoteContent> notes) {
         this.context = context;
@@ -48,7 +49,8 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
         if (noteContent.getPicturePath() != null) {
             Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(noteContent.getPicturePath()));
             holder.notePhoto.setImageURI(uri);
-        }
+        } else
+            holder.notePhoto.setVisibility(View.GONE);
         holder.noteTitle.setText(noteContent.getTitle());
         holder.noteDate.setText(noteContent.getDate());
         holder.noteDescription.setText(noteContent.getContent());
@@ -62,7 +64,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
         holder.buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Logger.e("delete " + noteContent.getId() + " " + noteContent.getTitle() + " " + noteContent.getContent());
+                deleteListener.onNoteDeleteListener(noteContent);
             }
         });
         holder.buttonAlarm.setOnClickListener(new View.OnClickListener() {
@@ -84,5 +86,13 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
     @Override
     public int getItemCount() {
         return notes.size();
+    }
+
+    public interface deleteNoteListener {
+        void onNoteDeleteListener(NoteContent note);
+    }
+
+    public void setOnNoteDeleteListener(deleteNoteListener listener) {
+        this.deleteListener = listener;
     }
 }

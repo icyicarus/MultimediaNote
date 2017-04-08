@@ -21,8 +21,6 @@ public class ViewHolderMediaList extends RecyclerView.ViewHolder {
     @BindView(R.id.media_cell_image) SimpleDraweeView mediaCellImage;
     @BindView(R.id.media_cell_path) AppCompatTextView mediaCellPath;
 
-    private MediaListCellData media;
-
     public ViewHolderMediaList(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
