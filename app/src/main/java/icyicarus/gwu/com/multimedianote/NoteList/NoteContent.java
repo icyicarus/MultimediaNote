@@ -1,14 +1,9 @@
 package icyicarus.gwu.com.multimedianote.NoteList;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
 import java.io.Serializable;
 import java.util.LinkedList;
 
 import icyicarus.gwu.com.multimedianote.MediaList.MediaListCellData;
-import icyicarus.gwu.com.multimedianote.NoteDB;
 
 /**
  * Created by IcarusXu on 3/3/2017.
@@ -21,13 +16,17 @@ public class NoteContent implements Serializable {
     private String content;
     private String picturePath;
     private LinkedList<MediaListCellData> mediaList;
+    private String latitude;
+    private String longitude;
 
-    public NoteContent(long id, String title, String date, String content, LinkedList<MediaListCellData> mediaList, String picturePath) {
+    public NoteContent(long id, String title, String date, String content, LinkedList<MediaListCellData> mediaList, String picturePath, String latitude, String longitude) {
         this.id = id;
         this.title = title;
         this.date = date;
         this.content = content;
         this.mediaList = mediaList;
+        this.latitude = latitude;
+        this.longitude = longitude;
         if (picturePath != null)
             this.picturePath = picturePath;
     }
@@ -52,24 +51,23 @@ public class NoteContent implements Serializable {
         return mediaList;
     }
 
-    public String getPicturePath() {
-        return picturePath;
+    public String getLatitude() {
+        return latitude;
     }
 
-    private Boolean checkMedia(int id, Context context) {
-        NoteDB db = new NoteDB(context);
-        SQLiteDatabase dbRead;
-        dbRead = db.getReadableDatabase();
+    public String getLongitude() {
+        return longitude;
+    }
 
-        Cursor c = dbRead.query(NoteDB.TABLE_NAME_MEDIA, null, NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID + "=?", new String[]{id + ""}, null, null, null);
-        while (c.moveToNext()) {
-            String path = c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH));
-            mediaList.add(new MediaListCellData(path));
-            if (path.endsWith(".jpg") && this.picturePath.equals("")) {
-                this.picturePath = path;
-            }
-        }
-        c.close();
-        return !this.picturePath.equals("");
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getPicturePath() {
+        return picturePath;
     }
 }

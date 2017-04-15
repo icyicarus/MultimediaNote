@@ -37,7 +37,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolderMediaList holder, int position) {
+    public void onBindViewHolder(final ViewHolderMediaList holder, final int position) {
         final MediaListCellData mediaListCellData = mediaList.get(position);
         Uri uri;
         if (mediaListCellData.type == Variables.MEDIA_TYPE_PHOTO)
@@ -75,7 +75,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
         holder.mediaCellContainer.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                deleteListener.onMediaDeleteListener(mediaListCellData);
+                deleteListener.onMediaDeleteListener(mediaListCellData, position);
                 return true;
             }
         });
@@ -87,7 +87,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     }
 
     public interface deleteMediaListener {
-        void onMediaDeleteListener(MediaListCellData media);
+        void onMediaDeleteListener(MediaListCellData media, int position);
     }
 
     public void setOnMediaDeleteListener(deleteMediaListener listener) {

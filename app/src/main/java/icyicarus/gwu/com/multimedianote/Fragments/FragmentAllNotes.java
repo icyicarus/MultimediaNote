@@ -23,9 +23,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icyicarus.gwu.com.multimedianote.MediaList.MediaListCellData;
-import icyicarus.gwu.com.multimedianote.NoteList.NoteContent;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.NoteList.AdapterNoteList;
+import icyicarus.gwu.com.multimedianote.NoteList.NoteContent;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 
@@ -50,6 +50,7 @@ public class FragmentAllNotes extends Fragment {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, null, null);
         writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, null, null);
+        ((AdapterNoteList) noteList.getAdapter()).getNotes().clear();
         noteList.getAdapter().notifyDataSetChanged();
     }
 
@@ -81,7 +82,9 @@ public class FragmentAllNotes extends Fragment {
                     c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_DATE)),
                     c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT)),
                     mediaList,
-                    picturePath
+                    picturePath,
+                    c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LATITUDE)),
+                    c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LONGITUDE))
             ));
             cc.close();
         }
@@ -92,9 +95,9 @@ public class FragmentAllNotes extends Fragment {
         AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query);
         adapterNoteList.setOnNoteDeleteListener(new AdapterNoteList.deleteNoteListener() {
             @Override
-            public void onNoteDeleteListener(NoteContent note) {
+            public void onNoteDeleteListener(NoteContent note, int position) {
                 query.remove(note);
-                noteList.getAdapter().notifyDataSetChanged();
+                noteList.getAdapter().notifyItemRemoved(position);
                 deleteNote(note);
             }
         });
