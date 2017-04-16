@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -21,7 +22,7 @@
             android:value="AIzaSyDUdAa0x3UVJiVqp3U7TSRbOo8seaAvFRA"/>
 
         <activity
-            android:name=".LaunchView"
+            android:name=".views.LaunchView"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -31,17 +32,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UserInterface"
+            android:name=".views.FragmentContainerView"
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
-            android:name=".MapView"
+            android:name=".views.MapView"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="icyicarus.gwu.com.multimedianote.Fragments.FragmentNote"
+            android:authorities="icyicarus.gwu.com.multimedianote.views.FragmentContainerView"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

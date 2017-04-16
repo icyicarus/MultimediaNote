@@ -18,5 +18,5 @@ public class Variables {
     public static final int MEDIA_TYPE_VIDEO = 8002;
     public static final int MEDIA_TYPE_AUDIO = 8003;
 
-    public static final String FILE_PROVIDER_AUTHORITIES = BuildConfig.APPLICATION_ID + ".Fragments.FragmentNote";
+    public static final String FILE_PROVIDER_AUTHORITIES = BuildConfig.APPLICATION_ID + ".views.FragmentContainerView";
 }
