@@ -15,6 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,12 +24,12 @@ import java.util.LinkedList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.NoteDB;
-import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
-import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
+import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
+import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 
 /**
  * Created by Icarus on 1/1/2017.
@@ -39,6 +41,9 @@ public class FragmentAllNotes extends Fragment {
     @BindView(R.id.clear) AppCompatButton clear;
     @BindView(R.id.note_list) RecyclerView noteList;
     @BindView(R.id.snackbar_container_all_note) CoordinatorLayout snackbarContainer;
+
+    private CalendarDay calendarDay;
+    private String queryDate;
 
     @OnClick(R.id.button)
     void testButtonClick() {
@@ -54,17 +59,39 @@ public class FragmentAllNotes extends Fragment {
         noteList.getAdapter().notifyDataSetChanged();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null)
+            calendarDay = getArguments().getParcelable("NOTE_DATE");
+        if (calendarDay != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(calendarDay.getYear()).append("-");
+            if (calendarDay.getMonth() < 9)
+                sb.append(0);
+            sb.append(calendarDay.getMonth() + 1);
+            if (calendarDay.getDay() < 9)
+                sb.append(0);
+            sb.append("-");
+            sb.append(calendarDay.getDay());
+            sb.append("%");
+            queryDate = sb.toString();
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        getActivity().setTitle("All Notes");
-
         View v = inflater.inflate(R.layout.fragment_all_notes, container, false);
         ButterKnife.bind(this, v);
 
         final ArrayList<NoteContent> query = new ArrayList<>();
         SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
-        Cursor c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, null, null, null, null, null, null);
+        Cursor c;
+        if (calendarDay != null)
+            c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, "date like ?", new String[]{queryDate}, null, null, null, null);
+        else
+            c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, null, null, null, null, null, null);
         Cursor cc;
         while (c.moveToNext()) {
             String picturePath = null;
@@ -105,6 +132,15 @@ public class FragmentAllNotes extends Fragment {
         return v;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (calendarDay != null)
+            getActivity().setTitle("All Notes on " + calendarDay.getYear() + " " + (calendarDay.getMonth() + 1) + " " + calendarDay.getDay());
+        else
+            getActivity().setTitle("All Notes");
+    }
+
     private void deleteNote(NoteContent note) {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, "_id=?", new String[]{note.getId() + ""});
@@ -126,11 +162,5 @@ public class FragmentAllNotes extends Fragment {
                 snackbar.show();
             }
         }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 }

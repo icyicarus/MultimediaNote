@@ -3,12 +3,9 @@ package icyicarus.gwu.com.multimedianote.views;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -17,9 +14,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
@@ -32,13 +30,13 @@ import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAbout;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAllNotes;
+import icyicarus.gwu.com.multimedianote.fragments.FragmentCalendar;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentFeedback;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentSettings;
 
 public class FragmentContainerView extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
-    @BindView(R.id.snackbar_container_fragment_container_view) CoordinatorLayout snackbarContainer;
 
     MenuItem activeMenu;
 
@@ -110,35 +108,35 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         if (activeMenu != item) {
+            Logger.e("click");
             if (activeMenu != null)
                 activeMenu.setChecked(false);
             activeMenu = item;
-            int id = item.getItemId();
-            navigationView.setCheckedItem(id);
-
-            switch (id) {
-                case R.id.nav_all_notes:
-                    getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                    break;
-                case R.id.nav_calendar:
-//                    setTitle("Calendar");
-//                    getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
-                    break;
-                case R.id.nav_alarm:
+        }
+        int id = item.getItemId();
+        navigationView.setCheckedItem(id);
+        switch (id) {
+            case R.id.nav_all_notes:
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                break;
+            case R.id.nav_calendar:
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentCalendar()).addToBackStack(null).commit();
+                break;
+            case R.id.nav_alarm:
 //                    setTitle("Alarm");
-                    break;
-                case R.id.nav_settings:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings()).addToBackStack(null).commit();
-                    break;
-                case R.id.nav_help_and_feedback:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentFeedback()).addToBackStack(null).commit();
-                    break;
-                case R.id.nav_about:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAbout()).addToBackStack(null).commit();
-                    break;
-                default:
-                    break;
-            }
+                break;
+            case R.id.nav_settings:
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings()).addToBackStack(null).commit();
+                break;
+            case R.id.nav_help_and_feedback:
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentFeedback()).addToBackStack(null).commit();
+                break;
+            case R.id.nav_about:
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAbout()).addToBackStack(null).commit();
+                break;
+            default:
+                break;
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -156,13 +154,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
             @Override
             public void onFailed(int requestCode, List<String> deniedPermissions) {
                 String message = "Permission denied, some function will be disabled until manually granted permission";
-                final Snackbar snackbar = Snackbar.make(snackbarContainer, message, Snackbar.LENGTH_LONG);
-                snackbar.setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        snackbar.dismiss();
-                    }
-                }).setActionTextColor(Color.WHITE).show();
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }

@@ -53,7 +53,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolderNoteList holder, final int position) {
+    public void onBindViewHolder(final ViewHolderNoteList holder, int position) {
         final NoteContent noteContent = notes.get(position);
         final Bundle bundle = new Bundle();
         bundle.putSerializable("NOTE_DATA", noteContent);
@@ -106,7 +106,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
         holder.buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteListener.onNoteDeleteListener(noteContent, position);
+                deleteListener.onNoteDeleteListener(noteContent, holder.getAdapterPosition());
             }
         });
         holder.buttonAlarm.setOnClickListener(new View.OnClickListener() {

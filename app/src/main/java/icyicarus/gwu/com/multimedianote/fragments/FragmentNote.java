@@ -79,8 +79,11 @@ public class FragmentNote extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null)
+        getActivity().setTitle("New Note");
+        if (getArguments() != null) {
             noteData = (NoteContent) getArguments().getSerializable("NOTE_DATA");
+            getActivity().setTitle(noteData.getTitle());
+        }
     }
 
     @Override
