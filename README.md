@@ -1,5 +1,14 @@
 # MultimediaNote 工作日志
 
+### 04/22/2017
+##### DONE
+* 引入了Volley，在地图中查询坐标和地址时使用异步网络通信
+* 显示有Note的日期
+##### TODO
+* 将闹钟移植进来
+* 实现保存按钮功能
+* 思考FragmentTransaction中add和replace的区别，测试生命周期
+
 ### 04/17/2017
 ##### DONE
 * 实现了日历功能和相关的切换逻辑

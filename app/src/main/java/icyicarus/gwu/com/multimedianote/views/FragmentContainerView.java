@@ -97,7 +97,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 super.onBackPressed();
             } else {
-                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                getSupportFragmentManager().popBackStack();
                 activeMenu = null;
                 navigationView.setCheckedItem(R.id.nav_all_notes);
             }
@@ -115,12 +116,9 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         }
         int id = item.getItemId();
         navigationView.setCheckedItem(id);
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         switch (id) {
-            case R.id.nav_all_notes:
-                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                break;
             case R.id.nav_calendar:
-                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentCalendar()).addToBackStack(null).commit();
                 break;
             case R.id.nav_alarm:
@@ -135,6 +133,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
             case R.id.nav_about:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAbout()).addToBackStack(null).commit();
                 break;
+            case R.id.nav_all_notes:
             default:
                 break;
         }
