@@ -3,6 +3,7 @@ package icyicarus.gwu.com.multimedianote.views;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -14,6 +15,12 @@ import android.support.v4.app.FragmentActivity;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.google.android.gms.common.ConnectionResult;
@@ -26,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.orhanobut.logger.Logger;
 import com.yanzhenjie.permission.AndPermission;
 
 import org.json.JSONException;
@@ -48,6 +56,8 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
     protected String extraLatitude = " ";
     protected String extraLongitude = " ";
     protected long markerClickTime = 0;
+    protected RequestQueue queue;
+    protected String mapApiKey;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,7 +75,8 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
 
             @Override
             public void onSearchAction(String currentQuery) {
-                getCoordinate(currentQuery);
+//                getCoordinate(currentQuery);
+                getCoordinateWithVolley(currentQuery);
             }
         });
 
@@ -74,6 +85,17 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentGoogleMap);
         mapFragment.getMapAsync(MapView.this);
+
+        try {
+            ApplicationInfo info = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+            mapApiKey = info.metaData.getString("com.google.android.geo.API_KEY");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Logger.e("No API key");
+            finish();
+        }
+
+        queue = Volley.newRequestQueue(this);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -142,7 +164,8 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
                 if (!Objects.equals(extraLatitude, " ") && !Objects.equals(extraLongitude, " ")) {
                     oldMarker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(extraLatitude), Double.parseDouble(extraLongitude))).draggable(true).flat(false));
                     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(oldMarker.getPosition(), 16));
-                    getAddress(oldMarker.getPosition());
+//                    getAddress(oldMarker.getPosition());
+                    getAddressWithVolley(oldMarker.getPosition());
                 } else {
                     LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -194,10 +217,10 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
     // GoogleMap.OnMapClickListener
     @Override
     public void onMapClick(LatLng latLng) {
-        if (oldMarker != null) {
+        if (oldMarker != null)
             oldMarker.remove();
-        }
-        getAddress(latLng);
+//        getAddress(latLng);
+        getAddressWithVolley(latLng);
         oldMarker = mGoogleMap.addMarker(new MarkerOptions().position(latLng).draggable(true).flat(true));
     }
 
@@ -214,7 +237,68 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
-        getAddress(marker.getPosition());
+//        getAddress(marker.getPosition());
+        getAddressWithVolley(marker.getPosition());
+    }
+
+    public void getAddressWithVolley(LatLng latLng) {
+        String url = "https://maps.google.com/maps/api/geocode/json?latlng=" + latLng.latitude + "," + latLng.longitude + "&key=" + mapApiKey;
+        StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    final String address = jsonObject.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            floatingSearchView.setSearchText(address);
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Logger.e(error.toString());
+            }
+        });
+        queue.add(request);
+    }
+
+    public void getCoordinateWithVolley(String address) {
+        address = address.replace(" ", "+");
+        String url = "https://maps.google.com/maps/api/geocode/json?address=" + address + "&key=" + mapApiKey;
+        StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    jsonObject = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+                    final double latitude = jsonObject.getDouble("lat");
+                    final double longitude = jsonObject.getDouble("lng");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (oldMarker != null)
+                                oldMarker.remove();
+                            oldMarker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).draggable(true).flat(false));
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Logger.e(error.toString());
+            }
+        });
+        queue.add(request);
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(oldMarker.getPosition(), 16));
     }
 
     public void getAddress(LatLng latLng) {
@@ -259,9 +343,8 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (oldMarker != null) {
+                                    if (oldMarker != null)
                                         oldMarker.remove();
-                                    }
                                     oldMarker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).draggable(true).flat(false));
                                 }
                             });

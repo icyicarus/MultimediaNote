@@ -260,7 +260,6 @@ public class FragmentNote extends Fragment {
             case MEDIA_TYPE_VIDEO:
             case MEDIA_TYPE_AUDIO:
                 if (resultCode == RESULT_OK) {
-                    Logger.e("11");
                     mediaListData.add(new MediaListCellData(f.getAbsolutePath()));
                     mediaList.getAdapter().notifyItemInserted(mediaListData.size());
                 } else {
