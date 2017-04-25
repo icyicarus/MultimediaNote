@@ -4,7 +4,6 @@
     android:id="@+id/container_note_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
     android:orientation="vertical"
     tools:context="icyicarus.gwu.com.multimedianote.fragments.FragmentNote">
 
@@ -12,7 +11,8 @@
         android:id="@+id/container_note_view_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="10dp">
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -44,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/container_note_view_title"
+        android:padding="10dp"
         android:paddingTop="10dp">
 
         <EditText
@@ -59,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/container_note_view_content"
-        android:paddingTop="10dp"/>
+        android:padding="10dp"/>
 
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"

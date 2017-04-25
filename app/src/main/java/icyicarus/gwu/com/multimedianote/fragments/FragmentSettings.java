@@ -9,8 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.orhanobut.logger.Logger;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.R;
@@ -32,11 +30,8 @@ public class FragmentSettings extends Fragment {
         getActivity().setTitle("Settings");
 
         userPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-        Logger.e(userPreferences.getBoolean(Variables.SOB, false) + "");
-
         View v = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, v);
-
         switchShowOKButton.setChecked(userPreferences.getBoolean(Variables.SOB, false));
         return v;
     }

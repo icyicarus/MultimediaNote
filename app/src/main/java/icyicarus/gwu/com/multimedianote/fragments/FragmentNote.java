@@ -298,7 +298,6 @@ public class FragmentNote extends Fragment {
                 startActivityForResult(i, MEDIA_TYPE_VIDEO);
                 break;
             case R.id.button_note_add_audio:
-//                Logger.d("button note add audio");
                 f = new File(getContext().getExternalFilesDir(null), "/media/" + System.currentTimeMillis() + ".wav");
                 Random rnd = new Random();
                 int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
