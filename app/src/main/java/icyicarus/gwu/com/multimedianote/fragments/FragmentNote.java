@@ -2,6 +2,7 @@ package icyicarus.gwu.com.multimedianote.fragments;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,8 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.orhanobut.logger.Logger;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,6 +41,7 @@ import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
 import icyicarus.gwu.com.multimedianote.FontManager;
 import icyicarus.gwu.com.multimedianote.NoteDB;
+import icyicarus.gwu.com.multimedianote.OperationDetail;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.medialist.AdapterMediaList;
@@ -71,10 +71,12 @@ public class FragmentNote extends Fragment {
 
     private LinkedList<MediaListCellData> mediaListData = null;
     private File f;
-
+    private Boolean showOKButton = false;
+    private LinkedList<OperationDetail> operationQueue = new LinkedList<>();
     private String latitude = " ";
     private String longitude = " ";
     private NoteContent noteData = null;
+    private Snackbar snackbar = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,6 +86,7 @@ public class FragmentNote extends Fragment {
             noteData = (NoteContent) getArguments().getSerializable("NOTE_DATA");
             getActivity().setTitle(noteData.getTitle());
         }
+        showOKButton = getActivity().getPreferences(Context.MODE_PRIVATE).getBoolean(Variables.SOB, false);
     }
 
     @Override
@@ -108,7 +111,8 @@ public class FragmentNote extends Fragment {
             public void onMediaDeleteListener(MediaListCellData media, int position) {
                 mediaListData.remove(media);
                 mediaList.getAdapter().notifyItemRemoved(position);
-                deleteMedia(media);
+//                deleteMedia(media);
+                operationQueue.add(new OperationDetail(OperationDetail.OPERATION_DEL, media));
             }
         });
         mediaList.setAdapter(adapterMediaList);
@@ -121,31 +125,21 @@ public class FragmentNote extends Fragment {
             buttonLocation.setEnabled(false);
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
             buttonNoteAddAudio.setEnabled(false);
-        return v;
-    }
 
-    private void deleteMedia(MediaListCellData media) {
-        SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
-        writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, "_id=?", new String[]{media.id + ""});
-        writeDatabase.close();
-        File file = new File(media.path);
-        final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
+        if (!showOKButton)
+            buttonNoteSave.setVisibility(View.GONE);
+
+        snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
         snackbar.setAction("OK", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 snackbar.dismiss();
             }
         }).setActionTextColor(Color.WHITE);
-        if (file.delete())
-            snackbar.setText("File deleted");
-        else
-            snackbar.setText("File not deleted, please delete it manually");
-        snackbar.show();
+        return v;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    private void saveNote() {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         ContentValues noteContent = new ContentValues();
 
@@ -172,19 +166,105 @@ public class FragmentNote extends Fragment {
             noteContent.put(NoteDB.COLUMN_ID, noteData.getId());
             writeDatabase.update(NoteDB.TABLE_NAME_NOTES, noteContent, "_id=?", new String[]{noteData.getId() + ""});
         }
+        clearQueue(writeDatabase);
+        writeDatabase.close();
+    }
 
-        if (mediaListData.size() > 0) {
-            for (MediaListCellData media : mediaListData) {
-                if (media.id == -1) {
-                    ContentValues mediaContent = new ContentValues();
-                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
-                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, noteData.getId());
-                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, mediaContent);
-                }
+    private void clearQueue(SQLiteDatabase writeDatabase) {
+//        if (mediaListData.size() > 0) {
+//            for (MediaListCellData media : mediaListData) {
+//                if (media.id == -1) {
+//                    ContentValues mediaContent = new ContentValues();
+//                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
+//                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, noteData.getId());
+//                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, mediaContent);
+//                }
+//            }
+//        }
+        while (operationQueue.peek() != null) {
+            OperationDetail operationDetail = operationQueue.poll();
+//        }
+//        for (OperationDetail operationDetail : operationQueue) {
+            MediaListCellData media = operationDetail.getMedia();
+            if (operationDetail.getOperation() == OperationDetail.OPERATION_ADD) {
+                ContentValues mediaContent = new ContentValues();
+                mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
+                mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, noteData.getId());
+                writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, mediaContent);
+            } else if (operationDetail.getOperation() == OperationDetail.OPERATION_DEL) {
+                writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, "_id=?", new String[]{media.id + ""});
+                File file = new File(media.path);
+//                final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
+//                snackbar.setAction("OK", new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        snackbar.dismiss();
+//                    }
+//                }).setActionTextColor(Color.WHITE);
+                if (file.delete())
+                    snackbar.setText("File deleted");
+                else
+                    snackbar.setText("File not deleted, please delete it manually");
+                snackbar.show();
             }
         }
+    }
 
-        writeDatabase.close();
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (showOKButton) {
+            for (OperationDetail operationDetail : operationQueue) {
+                if (operationDetail.getOperation() == OperationDetail.OPERATION_ADD) {
+                    File file = new File(operationDetail.getMedia().path);
+                    if (file.delete())
+                        snackbar.setText("File deleted");
+                    else
+                        snackbar.setText("File not deleted, please delete it manually");
+                    snackbar.show();
+                }
+            }
+        } else
+            saveNote();
+//        SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
+//        ContentValues noteContent = new ContentValues();
+//
+//        if (Objects.equals(fragmentNoteEditTextTitle.getText().toString(), ""))
+//            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "New Note");
+//        else
+//            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, fragmentNoteEditTextTitle.getText().toString());
+//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_DATE, noteData != null ? noteData.getDate() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_CONTENT, fragmentNoteEditTextContent.getText().toString());
+//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_LATITUDE, latitude);
+//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_LONGITUDE, longitude);
+//
+//        if (noteData == null) { // New
+//            noteData = new NoteContent(
+//                    writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, noteContent),
+//                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_TITLE),
+//                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_DATE),
+//                    noteContent.getAsString(NoteDB.COLUMN_NAME_NOTE_CONTENT),
+//                    mediaListData,
+//                    null,
+//                    latitude,
+//                    longitude);
+//        } else { // Old
+//            noteContent.put(NoteDB.COLUMN_ID, noteData.getId());
+//            writeDatabase.update(NoteDB.TABLE_NAME_NOTES, noteContent, "_id=?", new String[]{noteData.getId() + ""});
+//        }
+//
+//        if (mediaListData.size() > 0) {
+//            for (MediaListCellData media : mediaListData) {
+//                if (media.id == -1) {
+//                    ContentValues mediaContent = new ContentValues();
+//                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
+//                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, noteData.getId());
+//                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, mediaContent);
+//                }
+//            }
+//        }
+//
+//        writeDatabase.close();
     }
 
     @OnClick({R.id.button_note_save, R.id.button_note_add_photo, R.id.button_note_add_video, R.id.button_note_add_audio, R.id.button_location})
@@ -193,7 +273,10 @@ public class FragmentNote extends Fragment {
         Intent i;
         switch (v.getId()) {
             case R.id.button_note_save:
-                Logger.d("button note save");
+                saveNote();
+//                getActivity().getSupportFragmentManager().popBackStack();
+                snackbar.setText("Note saved");
+                snackbar.show();
                 break;
             case R.id.button_note_add_photo:
                 f = new File(getContext().getExternalFilesDir(null), "/media/" + System.currentTimeMillis() + ".jpg");
@@ -260,8 +343,10 @@ public class FragmentNote extends Fragment {
             case MEDIA_TYPE_VIDEO:
             case MEDIA_TYPE_AUDIO:
                 if (resultCode == RESULT_OK) {
-                    mediaListData.add(new MediaListCellData(f.getAbsolutePath()));
+                    MediaListCellData media = new MediaListCellData(f.getAbsolutePath());
+                    mediaListData.add(media);
                     mediaList.getAdapter().notifyItemInserted(mediaListData.size());
+                    operationQueue.add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
                 } else {
                     if (requestCode != MEDIA_TYPE_PHOTO && !f.delete()) {
                         final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
