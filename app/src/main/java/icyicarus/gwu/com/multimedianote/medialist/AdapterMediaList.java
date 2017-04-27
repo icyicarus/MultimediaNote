@@ -15,10 +15,6 @@ import java.util.List;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 
-/**
- * Created by IcarusXu on 4/4/2017.
- */
-
 public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> {
 
     private Context context;

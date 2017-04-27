@@ -28,10 +28,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icyicarus.gwu.com.multimedianote.R;
 
-/**
- * Created by Icarus on 1/1/2017.
- */
-
 public class FragmentFeedback extends Fragment {
     private Boolean nameEdited = false, issueEdited = false;
     @BindView(R.id.feedback_name_layout) TextInputLayout feedbackNameLayout;

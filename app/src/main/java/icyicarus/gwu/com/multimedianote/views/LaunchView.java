@@ -10,11 +10,6 @@ import android.widget.ImageView;
 
 import icyicarus.gwu.com.multimedianote.R;
 
-
-/**
- * Created by IcarusXu on 4/2/2017.
- */
-
 public class LaunchView extends AppCompatActivity {
 
     private Handler handler = new Handler();

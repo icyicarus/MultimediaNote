@@ -31,10 +31,6 @@ import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 
-/**
- * Created by Icarus on 1/1/2017.
- */
-
 public class FragmentAllNotes extends Fragment {
 
     @BindView(R.id.button) AppCompatButton button;
@@ -119,7 +115,7 @@ public class FragmentAllNotes extends Fragment {
         readDatabase.close();
 
         noteList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query, getActivity().getSupportFragmentManager());
+        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query);
         adapterNoteList.setOnNoteDeleteListener(new AdapterNoteList.deleteNoteListener() {
             @Override
             public void onNoteDeleteListener(NoteContent note, int position) {

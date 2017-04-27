@@ -2,10 +2,6 @@ package icyicarus.gwu.com.multimedianote;
 
 import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 
-/**
- * Created by IcarusXu on 4/24/2017.
- */
-
 public class OperationDetail {
 
     public static final int OPERATION_DEL = 1;

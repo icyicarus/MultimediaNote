@@ -15,11 +15,7 @@ import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.FontManager;
 import icyicarus.gwu.com.multimedianote.R;
 
-/**
- * Created by IcarusXu on 3/3/2017.
- */
-
-public class ViewHolderNoteList extends RecyclerView.ViewHolder {
+class ViewHolderNoteList extends RecyclerView.ViewHolder {
     @BindView(R.id.note_content_block) LinearLayoutCompat noteContentBlock;
     @BindView(R.id.note_photo) SimpleDraweeView notePhoto;
     @BindView(R.id.note_title) AppCompatTextView noteTitle;
@@ -31,7 +27,7 @@ public class ViewHolderNoteList extends RecyclerView.ViewHolder {
 
     private NoteContent note;
 
-    public ViewHolderNoteList(View itemView, Context context) {
+    ViewHolderNoteList(View itemView, Context context) {
         super(itemView);
         ButterKnife.bind(this, itemView);
 
@@ -39,11 +35,7 @@ public class ViewHolderNoteList extends RecyclerView.ViewHolder {
         FontManager.markAsIconContainer(itemView, iconFont);
     }
 
-    public void setTag(NoteContent noteContent) {
+    void setTag(NoteContent noteContent) {
         note = noteContent;
-    }
-
-    public NoteContent getTag() {
-        return note;
     }
 }

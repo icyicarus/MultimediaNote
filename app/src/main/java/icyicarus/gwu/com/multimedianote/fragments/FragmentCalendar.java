@@ -31,10 +31,6 @@ import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 
-/**
- * Created by IcarusXu on 4/16/2017.
- */
-
 public class FragmentCalendar extends Fragment implements OnDateSelectedListener {
 
     @BindView(R.id.calendar_view) MaterialCalendarView materialCalendarView;

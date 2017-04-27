@@ -6,10 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-/**
- * Created by IcarusXu on 4/1/2017.
- */
-
 public class FontManager {
     public static final String FONT_AWESOME = "fonts/fontawesome-webfont.ttf";
 

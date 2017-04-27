@@ -10,10 +10,6 @@ import android.view.ViewGroup;
 import icyicarus.gwu.com.multimedianote.R;
 import mehdi.sakout.aboutpage.AboutPage;
 
-/**
- * Created by Icarus on 1/1/2017.
- */
-
 public class FragmentAbout extends Fragment {
     @Nullable
     @Override

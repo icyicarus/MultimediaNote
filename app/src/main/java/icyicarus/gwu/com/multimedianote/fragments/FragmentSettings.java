@@ -14,10 +14,6 @@ import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 
-/**
- * Created by Icarus on 1/13/2017.
- */
-
 public class FragmentSettings extends Fragment {
     @BindView(R.id.switch_show_ok_button)
     SwitchCompat switchShowOKButton;

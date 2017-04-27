@@ -5,10 +5,6 @@ import java.util.LinkedList;
 
 import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 
-/**
- * Created by IcarusXu on 3/3/2017.
- */
-
 public class NoteContent implements Serializable {
     private long id;
     private String title;

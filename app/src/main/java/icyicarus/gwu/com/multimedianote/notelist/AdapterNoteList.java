@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -26,21 +25,15 @@ import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
 import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 
-/**
- * Created by IcarusXu on 3/3/2017.
- */
-
 public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
 
     private Context context;
     private List<NoteContent> notes;
     private deleteNoteListener deleteListener;
-    private FragmentManager fragmentManager;
 
-    public AdapterNoteList(Context context, List<NoteContent> notes, FragmentManager fragmentManager) {
+    public AdapterNoteList(Context context, List<NoteContent> notes) {
         this.context = context;
         this.notes = notes;
-        this.fragmentManager = fragmentManager;
     }
 
     public List<NoteContent> getNotes() {
