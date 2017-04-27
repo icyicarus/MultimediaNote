@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -15,17 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.orhanobut.logger.Logger;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
+import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
+import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 
 /**
  * Created by IcarusXu on 3/3/2017.
@@ -36,10 +35,12 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
     private Context context;
     private List<NoteContent> notes;
     private deleteNoteListener deleteListener;
+    private FragmentManager fragmentManager;
 
-    public AdapterNoteList(Context context, List<NoteContent> notes) {
+    public AdapterNoteList(Context context, List<NoteContent> notes, FragmentManager fragmentManager) {
         this.context = context;
         this.notes = notes;
+        this.fragmentManager = fragmentManager;
     }
 
     public List<NoteContent> getNotes() {
@@ -48,7 +49,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
 
     @Override
     public ViewHolderNoteList onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.card_note_list, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.cell_note_list, parent, false);
         return new ViewHolderNoteList(v, context);
     }
 
@@ -107,12 +108,6 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
             @Override
             public void onClick(View v) {
                 deleteListener.onNoteDeleteListener(noteContent, holder.getAdapterPosition());
-            }
-        });
-        holder.buttonAlarm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Logger.e("");
             }
         });
         holder.buttonEdit.setOnClickListener(new View.OnClickListener() {

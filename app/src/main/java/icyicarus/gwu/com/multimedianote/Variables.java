@@ -12,6 +12,11 @@ public class Variables {
     public static final String EXTRA_NOTE_LATITUDE = "noteLatitude";
     public static final String EXTRA_NOTE_LONGITUDE = "noteLongitude";
 
+    public static final String EXTRA_ALARM_ID = "alarmID";
+    public static final String EXTRA_NOTE_ID = "noteID";
+    public static final String EXTRA_NOTE_TITLE = "noteTitle";
+    public static final String EXTRA_NOTE_CONTENT = "noteContent";
+
     public static final int ADD_LOCATION = 8000;
 
     public static final int MEDIA_TYPE_PHOTO = 8001;

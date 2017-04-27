@@ -119,7 +119,7 @@ public class FragmentAllNotes extends Fragment {
         readDatabase.close();
 
         noteList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query);
+        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query, getActivity().getSupportFragmentManager());
         adapterNoteList.setOnNoteDeleteListener(new AdapterNoteList.deleteNoteListener() {
             @Override
             public void onNoteDeleteListener(NoteContent note, int position) {

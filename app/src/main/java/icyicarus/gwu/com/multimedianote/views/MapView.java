@@ -43,8 +43,6 @@ import java.util.Objects;
 
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
-import icyicarus.gwu.com.multimedianote.http.HTTPTool;
-import icyicarus.gwu.com.multimedianote.http.HttpCallbackListener;
 
 public class MapView extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 
@@ -300,67 +298,4 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
         queue.add(request);
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(oldMarker.getPosition(), 16));
     }
-
-    public void getAddress(LatLng latLng) {
-        HTTPTool.sendRequest("https://maps.google.com/maps/api/geocode/json?latlng=" + latLng.latitude + "," + latLng.longitude + "&key=AIzaSyACwJPuT9EH5OI-r_mUJillausCQ6txedE",
-                new HttpCallbackListener() {
-                    @Override
-                    public void onFinish(String response) {
-                        JSONObject jsonObject;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            final String addressRecord = jsonObject.getJSONArray("results").getJSONObject(0).getString("formatted_address");
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    floatingSearchView.setSearchText(addressRecord);
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-        );
-    }
-
-    public void getCoordinate(String address) {
-        address = address.replace(" ", "+");
-        HTTPTool.sendRequest("https://maps.google.com/maps/api/geocode/json?address=" + address + "&key=AIzaSyACwJPuT9EH5OI-r_mUJillausCQ6txedE",
-                new HttpCallbackListener() {
-                    @Override
-                    public void onFinish(String response) {
-                        JSONObject jsonObject;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            final double latitude = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").getDouble("lat");
-                            final double longitude = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").getDouble("lng");
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (oldMarker != null)
-                                        oldMarker.remove();
-                                    oldMarker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).draggable(true).flat(false));
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-        );
-
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(oldMarker.getPosition(), 16));
-    }
-
 }

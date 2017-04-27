@@ -27,7 +27,6 @@ public class ViewHolderNoteList extends RecyclerView.ViewHolder {
     @BindView(R.id.note_description) AppCompatTextView noteDescription;
     @BindView(R.id.button_share) AppCompatButton buttonShare;
     @BindView(R.id.button_delete) AppCompatButton buttonDelete;
-    @BindView(R.id.button_set_alarm) AppCompatButton buttonAlarm;
     @BindView(R.id.button_edit) AppCompatButton buttonEdit;
 
     private NoteContent note;
