@@ -33,6 +33,7 @@
         </activity>
         <activity
             android:name=".views.FragmentContainerView"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
@@ -40,30 +41,21 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
-        <activity
-            android:name=".alarm.NoteAlarm"
-            android:exported="true"/>
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="icyicarus.gwu.com.multimedianote.views.FragmentContainerView"
-            android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"/>
         </provider>
 
-        <receiver android:name=".receivers.BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".receivers.AlarmReceiver">
-            <intent-filter>
-                <action android:name="icyicarus.gwu.com.multimedianote.ALARM"/>
-            </intent-filter>
-        </receiver>
+        <!--<receiver android:name=".receivers.BootReceiver">-->
+        <!--<intent-filter>-->
+        <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
+        <!--</intent-filter>-->
+        <!--</receiver>-->
+        <receiver android:name=".receivers.AlarmReceiver"/>
     </application>
 
 </manifest>

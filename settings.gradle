@@ -1,1 +1,1 @@
-include ':app', ':recorder'
+include ':app'

@@ -47,5 +47,11 @@ public class LaunchView extends AppCompatActivity {
         super.onBackPressed();
         handler.removeCallbacks(runnable);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handler.removeCallbacks(runnable);
+    }
 }
 

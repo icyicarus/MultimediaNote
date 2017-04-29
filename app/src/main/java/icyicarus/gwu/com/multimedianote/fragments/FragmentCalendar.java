@@ -30,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
+import icyicarus.gwu.com.multimedianote.Variables;
 
 public class FragmentCalendar extends Fragment implements OnDateSelectedListener {
 
@@ -38,6 +39,12 @@ public class FragmentCalendar extends Fragment implements OnDateSelectedListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setTitle("Calendar");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         getActivity().setTitle("Calendar");
     }
 
@@ -75,7 +82,7 @@ public class FragmentCalendar extends Fragment implements OnDateSelectedListener
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable("NOTE_DATE", date);
+        bundle.putParcelable(Variables.EXTRA_NOTE_DATE, date);
         Fragment fragment = new FragmentAllNotes();
         fragment.setArguments(bundle);
         getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment, date.toString()).addToBackStack(null).commit();
@@ -86,7 +93,7 @@ public class FragmentCalendar extends Fragment implements OnDateSelectedListener
         private Drawable drawable;
 
         SelectionDecorator(Fragment context) {
-            drawable = context.getResources().getDrawable(R.drawable.my_selector);
+            drawable = context.getResources().getDrawable(R.drawable.calendar_celection);
         }
 
         @Override

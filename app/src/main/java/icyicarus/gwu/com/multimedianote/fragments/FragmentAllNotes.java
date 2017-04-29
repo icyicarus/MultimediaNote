@@ -59,7 +59,7 @@ public class FragmentAllNotes extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
-            calendarDay = getArguments().getParcelable("NOTE_DATE");
+            calendarDay = getArguments().getParcelable(Variables.EXTRA_NOTE_DATE);
         if (calendarDay != null) {
             StringBuilder sb = new StringBuilder();
             sb.append(calendarDay.getYear()).append("-");
@@ -115,7 +115,7 @@ public class FragmentAllNotes extends Fragment {
         readDatabase.close();
 
         noteList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query);
+        AdapterNoteList adapterNoteList = new AdapterNoteList(getContext(), query, getFragmentManager());
         adapterNoteList.setOnNoteDeleteListener(new AdapterNoteList.deleteNoteListener() {
             @Override
             public void onNoteDeleteListener(NoteContent note, int position) {
@@ -132,7 +132,7 @@ public class FragmentAllNotes extends Fragment {
     public void onResume() {
         super.onResume();
         if (calendarDay != null)
-            getActivity().setTitle("All Notes on " + calendarDay.getYear() + " " + (calendarDay.getMonth() + 1) + " " + calendarDay.getDay());
+            getActivity().setTitle("All Notes on " + calendarDay.getYear() + "-" + (calendarDay.getMonth() + 1) + "-" + calendarDay.getDay());
         else
             getActivity().setTitle("All Notes");
     }

@@ -8,6 +8,9 @@ public class Variables {
     public static final String EXTRA_NOTE_LATITUDE = "noteLatitude";
     public static final String EXTRA_NOTE_LONGITUDE = "noteLongitude";
 
+    public static final String EXTRA_NOTE_DATA = "noteData";
+    public static final String EXTRA_NOTE_DATE = "noteDate";
+
     public static final int ADD_LOCATION = 8000;
 
     public static final int MEDIA_TYPE_PHOTO = 8001;

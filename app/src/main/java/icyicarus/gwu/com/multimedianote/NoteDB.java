@@ -20,6 +20,10 @@ public class NoteDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_MEDIA_PATH = "path";
     public static final String COLUMN_NAME_MEDIA_OWNER_NOTE_ID = "owner";
 
+    public static final String TABLE_NAME_ALARM = "alarm";
+    public static final String COLUMN_NAME_ALARM_TIME = "time";
+    public static final String COLUMN_NAME_ALARM_NOTEID = "noteid";
+
     public NoteDB(Context context) {
         super(context, "notes", null, DATABASE_VERSION);
     }
@@ -38,6 +42,11 @@ public class NoteDB extends SQLiteOpenHelper {
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_NAME_MEDIA_PATH + " TEXT NOT NULL DEFAULT \"\","
                 + COLUMN_NAME_MEDIA_OWNER_NOTE_ID + " INTEGER NOT NULL DEFAULT 0"
+                + ");");
+        db.execSQL("CREATE TABLE " + TABLE_NAME_ALARM + "("
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_NAME_ALARM_TIME + " TEXT NOT NULL DEFAULT \"\","
+                + COLUMN_NAME_ALARM_NOTEID + " TEXT NOT NULL DEFAULT \"\""
                 + ");");
     }
 

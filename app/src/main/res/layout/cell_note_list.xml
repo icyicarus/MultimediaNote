@@ -96,6 +96,17 @@
                             android:textSize="15sp"/>
 
                         <android.support.v7.widget.AppCompatButton
+                            android:id="@+id/button_set_alarm"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#00000000"
+                            android:padding="10dp"
+                            android:text="&#xf017;"
+                            android:textColor="#7AD3E0"
+                            android:textSize="15sp"/>
+
+                        <android.support.v7.widget.AppCompatButton
                             android:id="@+id/button_edit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

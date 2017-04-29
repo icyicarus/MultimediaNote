@@ -83,7 +83,7 @@ public class FragmentNote extends Fragment {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("New Note");
         if (getArguments() != null) {
-            noteData = (NoteContent) getArguments().getSerializable("NOTE_DATA");
+            noteData = (NoteContent) getArguments().getSerializable(Variables.EXTRA_NOTE_DATA);
             getActivity().setTitle(noteData.getTitle());
         }
         showOKButton = getActivity().getPreferences(Context.MODE_PRIVATE).getBoolean(Variables.SOB, false);
@@ -279,7 +279,7 @@ public class FragmentNote extends Fragment {
                 snackbar.show();
                 break;
             case R.id.button_note_add_photo:
-                f = new File(getContext().getExternalFilesDir(null), "/media/" + System.currentTimeMillis() + ".jpg");
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
                 uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
                 i = new Intent();
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -289,7 +289,7 @@ public class FragmentNote extends Fragment {
                 break;
             case R.id.button_note_add_video:
 //                f = new File(Environment.getExternalStorageDirectory(), "/temp/" + System.currentTimeMillis() + ".mp4");
-                f = new File(getContext().getExternalFilesDir(null), "/media/" + System.currentTimeMillis() + ".mp4");
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".mp4");
                 uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
                 i = new Intent();
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -298,7 +298,7 @@ public class FragmentNote extends Fragment {
                 startActivityForResult(i, MEDIA_TYPE_VIDEO);
                 break;
             case R.id.button_note_add_audio:
-                f = new File(getContext().getExternalFilesDir(null), "/media/" + System.currentTimeMillis() + ".wav");
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".wav");
                 Random rnd = new Random();
                 int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
                 AndroidAudioRecorder.with(this)

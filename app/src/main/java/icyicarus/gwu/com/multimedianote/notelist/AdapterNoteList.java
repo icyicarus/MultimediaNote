@@ -1,12 +1,17 @@
 package icyicarus.gwu.com.multimedianote.notelist;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -15,25 +20,38 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
+import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
+
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
+import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
 import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
 
 public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
 
     private Context context;
     private List<NoteContent> notes;
     private deleteNoteListener deleteListener;
+    private FragmentManager fragmentManager;
 
-    public AdapterNoteList(Context context, List<NoteContent> notes) {
+    public AdapterNoteList(Context context, List<NoteContent> notes, FragmentManager fragmentManager) {
         this.context = context;
         this.notes = notes;
+        this.fragmentManager = fragmentManager;
     }
 
     public List<NoteContent> getNotes() {
@@ -50,7 +68,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
     public void onBindViewHolder(final ViewHolderNoteList holder, int position) {
         final NoteContent noteContent = notes.get(position);
         final Bundle bundle = new Bundle();
-        bundle.putSerializable("NOTE_DATA", noteContent);
+        bundle.putSerializable(Variables.EXTRA_NOTE_DATA, noteContent);
         if (noteContent.getPicturePath() != null) {
             Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(noteContent.getPicturePath()));
             holder.notePhoto.setImageURI(uri);
@@ -101,6 +119,53 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
             @Override
             public void onClick(View v) {
                 deleteListener.onNoteDeleteListener(noteContent, holder.getAdapterPosition());
+            }
+        });
+        holder.buttonAlarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final SQLiteDatabase writeDatabase = (new NoteDB(context)).getWritableDatabase();
+                final StringBuilder sb = new StringBuilder();
+                final ContentValues cv = new ContentValues();
+                cv.put(NoteDB.COLUMN_NAME_ALARM_NOTEID, noteContent.getId());
+                CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment()
+                        .setOnDateSetListener(new CalendarDatePickerDialogFragment.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
+                                sb.append(year).append("-").append(monthOfYear + 1).append("-").append(dayOfMonth).append(" ");
+                                RadialTimePickerDialogFragment rdp = new RadialTimePickerDialogFragment()
+                                        .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                                            @Override
+                                            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                                sb.append(hourOfDay).append(":");
+                                                if (minute < 10)
+                                                    sb.append(0);
+                                                sb.append(minute).append(":00");
+                                                cv.put(NoteDB.COLUMN_NAME_ALARM_TIME, sb.toString());
+                                                int alarmID = (int) writeDatabase.insert(NoteDB.TABLE_NAME_ALARM, null, cv);
+                                                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                                                Intent i = new Intent(context, AlarmReceiver.class);
+//                                                i.putExtra(Variables.EXTRA_ALARM_ID, alarmID);
+//                                                i.putExtra(Variables.EXTRA_NOTE_ID, noteContent.getId());
+//                                                i.putExtra(Variables.EXTRA_NOTE_TITLE, noteContent.getTitle());
+//                                                i.putExtra(Variables.EXTRA_NOTE_CONTENT, noteContent.getContent());
+                                                i.putExtra(Variables.EXTRA_NOTE_DATA, bundle);
+
+                                                PendingIntent pi = PendingIntent.getBroadcast(context, alarmID, i, 0);
+                                                try {
+                                                    am.set(AlarmManager.RTC_WAKEUP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sb.toString()).getTime(), pi);
+                                                } catch (ParseException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        })
+                                        .setStartTime(new Date().getHours(), new Date().getMinutes());
+                                rdp.show(fragmentManager, "Time Picker Fragment");
+                            }
+                        })
+                        .setFirstDayOfWeek(Calendar.SUNDAY)
+                        .setDateRange(new MonthAdapter.CalendarDay(), null);
+                cdp.show(fragmentManager, "Date Picker Fragment");
             }
         });
         holder.buttonEdit.setOnClickListener(new View.OnClickListener() {

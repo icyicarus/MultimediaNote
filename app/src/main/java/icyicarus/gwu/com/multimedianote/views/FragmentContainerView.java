@@ -1,12 +1,14 @@
 package icyicarus.gwu.com.multimedianote.views;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,7 +19,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
@@ -32,6 +33,7 @@ import icyicarus.gwu.com.multimedianote.fragments.FragmentAbout;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAllNotes;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentCalendar;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentFeedback;
+import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentSettings;
 
 public class FragmentContainerView extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -43,11 +45,9 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (LeakCanary.isInAnalyzerProcess(this))
             return;
         LeakCanary.install(getApplication());
-        Stetho.initializeWithDefaults(this);
 
         setContentView(R.layout.activity_user_interface);
         ButterKnife.bind(this);
@@ -88,6 +88,22 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                             Manifest.permission.WRITE_EXTERNAL_STORAGE
                     )
                     .send();
+        processIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+
+    private void processIntent(Intent intent) {
+        Bundle bundle = intent.getBundleExtra(Variables.EXTRA_NOTE_DATA);
+        if (bundle != null) {
+            Fragment fragment = new FragmentNote();
+            fragment.setArguments(bundle);
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment).addToBackStack(null).commit();
+        }
     }
 
     @Override
