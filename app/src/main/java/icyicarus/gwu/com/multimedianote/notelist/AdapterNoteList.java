@@ -127,6 +127,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
                 final SQLiteDatabase writeDatabase = (new NoteDB(context)).getWritableDatabase();
                 final StringBuilder sb = new StringBuilder();
                 final ContentValues cv = new ContentValues();
+                final Calendar calendar = Calendar.getInstance();
                 cv.put(NoteDB.COLUMN_NAME_ALARM_NOTEID, noteContent.getId());
                 CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment()
                         .setOnDateSetListener(new CalendarDatePickerDialogFragment.OnDateSetListener() {
@@ -137,25 +138,33 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
                                         .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
                                             @Override
                                             public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                                sb.append(hourOfDay).append(":");
-                                                if (minute < 10)
-                                                    sb.append(0);
-                                                sb.append(minute).append(":00");
-                                                cv.put(NoteDB.COLUMN_NAME_ALARM_TIME, sb.toString());
-                                                int alarmID = (int) writeDatabase.insert(NoteDB.TABLE_NAME_ALARM, null, cv);
-                                                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                                                Intent i = new Intent(context, AlarmReceiver.class);
-//                                                i.putExtra(Variables.EXTRA_ALARM_ID, alarmID);
-//                                                i.putExtra(Variables.EXTRA_NOTE_ID, noteContent.getId());
-//                                                i.putExtra(Variables.EXTRA_NOTE_TITLE, noteContent.getTitle());
-//                                                i.putExtra(Variables.EXTRA_NOTE_CONTENT, noteContent.getContent());
-                                                i.putExtra(Variables.EXTRA_NOTE_DATA, bundle);
+                                                if (hourOfDay < calendar.get(Calendar.HOUR_OF_DAY)) {
+                                                    new AlertDialog.Builder(context)
+                                                            .setCancelable(false)
+                                                            .setTitle("Time expired")
+                                                            .setMessage("Cannot set time prior to current time, please reset")
+                                                            .setPositiveButton("OK", null)
+                                                            .create()
+                                                            .show();
+                                                } else {
+                                                    sb.append(hourOfDay).append(":");
+                                                    if (minute < 10)
+                                                        sb.append(0);
+                                                    sb.append(minute).append(":00");
 
-                                                PendingIntent pi = PendingIntent.getBroadcast(context, alarmID, i, 0);
-                                                try {
-                                                    am.set(AlarmManager.RTC_WAKEUP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sb.toString()).getTime(), pi);
-                                                } catch (ParseException e) {
-                                                    e.printStackTrace();
+                                                    cv.put(NoteDB.COLUMN_NAME_ALARM_TIME, sb.toString());
+                                                    int alarmID = (int) writeDatabase.insert(NoteDB.TABLE_NAME_ALARM, null, cv);
+                                                    AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                                                    Intent i = new Intent(context, AlarmReceiver.class);
+                                                    i.putExtra(Variables.EXTRA_ALARM_ID, alarmID);
+                                                    i.putExtra(Variables.EXTRA_NOTE_DATA, bundle);
+
+                                                    PendingIntent pi = PendingIntent.getBroadcast(context, alarmID, i, 0);
+                                                    try {
+                                                        am.set(AlarmManager.RTC_WAKEUP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sb.toString()).getTime(), pi);
+                                                    } catch (ParseException e) {
+                                                        e.printStackTrace();
+                                                    }
                                                 }
                                             }
                                         })

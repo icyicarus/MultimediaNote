@@ -19,6 +19,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.stetho.Stetho;
+import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
@@ -48,6 +50,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         if (LeakCanary.isInAnalyzerProcess(this))
             return;
         LeakCanary.install(getApplication());
+        Stetho.initializeWithDefaults(this);
 
         setContentView(R.layout.activity_user_interface);
         ButterKnife.bind(this);
@@ -94,12 +97,14 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        Logger.e("container new intent");
         processIntent(intent);
     }
 
     private void processIntent(Intent intent) {
         Bundle bundle = intent.getBundleExtra(Variables.EXTRA_NOTE_DATA);
         if (bundle != null) {
+            Logger.e("bundle not null");
             Fragment fragment = new FragmentNote();
             fragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment).addToBackStack(null).commit();

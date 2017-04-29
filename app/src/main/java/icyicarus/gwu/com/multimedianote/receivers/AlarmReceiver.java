@@ -22,6 +22,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         intent.setClass(context, FragmentContainerView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        int alarmID = intent.getIntExtra(Variables.EXTRA_ALARM_ID, -1);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         assert noteContent != null;
@@ -30,13 +31,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 //                .setTicker("Ticker")
                 .setWhen(System.currentTimeMillis())
                 .setContentText(noteContent.getContent())
-                .setContentIntent(PendingIntent.getActivity(context, 0x111, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(context, alarmID, intent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setAutoCancel(true)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
 
-        notificationManager.notify(0x103, builder.build());
+        notificationManager.notify(alarmID, builder.build());
 
         SQLiteDatabase writeDatabase = (new NoteDB(context)).getWritableDatabase();
-        writeDatabase.delete(NoteDB.TABLE_NAME_ALARM, NoteDB.COLUMN_ID + "=?", new String[]{intent.getIntExtra("alarmID", -1) + ""});
+        writeDatabase.delete(NoteDB.TABLE_NAME_ALARM, NoteDB.COLUMN_ID + "=?", new String[]{alarmID + ""});
     }
 }

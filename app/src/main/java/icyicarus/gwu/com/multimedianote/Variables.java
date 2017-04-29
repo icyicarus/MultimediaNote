@@ -7,7 +7,7 @@ public class Variables {
 
     public static final String EXTRA_NOTE_LATITUDE = "noteLatitude";
     public static final String EXTRA_NOTE_LONGITUDE = "noteLongitude";
-
+    public static final String EXTRA_ALARM_ID = "alarmID";
     public static final String EXTRA_NOTE_DATA = "noteData";
     public static final String EXTRA_NOTE_DATE = "noteDate";
 

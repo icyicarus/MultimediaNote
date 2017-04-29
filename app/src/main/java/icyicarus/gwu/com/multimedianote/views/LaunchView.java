@@ -8,6 +8,8 @@ import android.view.WindowManager;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 
+import com.orhanobut.logger.Logger;
+
 import icyicarus.gwu.com.multimedianote.R;
 
 public class LaunchView extends AppCompatActivity {
@@ -21,13 +23,8 @@ public class LaunchView extends AppCompatActivity {
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-//        }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.view_launch);
 
@@ -40,6 +37,12 @@ public class LaunchView extends AppCompatActivity {
         scaleAnimation.startNow();
         handler.postDelayed(runnable, 2000);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Logger.e("launch new intent");
     }
 
     @Override

@@ -46,7 +46,7 @@ public class NoteDB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TABLE_NAME_ALARM + "("
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_NAME_ALARM_TIME + " TEXT NOT NULL DEFAULT \"\","
-                + COLUMN_NAME_ALARM_NOTEID + " TEXT NOT NULL DEFAULT \"\""
+                + COLUMN_NAME_ALARM_NOTEID + " INTEGER NOT NULL DEFAULT \"\""
                 + ");");
     }
 
