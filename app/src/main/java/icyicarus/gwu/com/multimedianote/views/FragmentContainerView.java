@@ -54,7 +54,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
 
         setContentView(R.layout.activity_user_interface);
         ButterKnife.bind(this);
-        Fresco.initialize(this);
+        Fresco.initialize(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

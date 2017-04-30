@@ -1,5 +1,9 @@
 package icyicarus.gwu.com.multimedianote.fragments;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -30,6 +34,7 @@ import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
 import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
+import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
 
 public class FragmentAllNotes extends Fragment {
 
@@ -141,7 +146,6 @@ public class FragmentAllNotes extends Fragment {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, "_id=?", new String[]{note.getId() + ""});
         writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, "owner=?", new String[]{note.getId() + ""});
-        writeDatabase.close();
         LinkedList<MediaListCellData> mediaList = note.getMediaList();
         File file;
         for (MediaListCellData media : mediaList) {
@@ -158,5 +162,13 @@ public class FragmentAllNotes extends Fragment {
                 snackbar.show();
             }
         }
+        AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+        Cursor c = writeDatabase.query(NoteDB.TABLE_NAME_ALARM, null, NoteDB.COLUMN_NAME_ALARM_NOTEID + "=?", new String[]{note.getId() + ""}, null, null, null, null);
+        while (c.moveToNext()) {
+            Intent i = new Intent(getActivity().getApplicationContext(), AlarmReceiver.class);
+            PendingIntent pi = PendingIntent.getBroadcast(getActivity().getApplicationContext(), c.getInt(c.getColumnIndex(NoteDB.COLUMN_ID)), i, 0);
+            am.cancel(pi);
+        }
+        c.close();
     }
 }
