@@ -1,6 +1,6 @@
 package icyicarus.gwu.com.multimedianote;
 
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 
 public class OperationDetail {
 
@@ -8,18 +8,18 @@ public class OperationDetail {
     public static final int OPERATION_ADD = 2;
 
     private int operation = 0;
-    private MediaListCellData media = null;
+    private MediaContent media = null;
 
-    public OperationDetail(int operation, MediaListCellData mediaListCellData) {
+    public OperationDetail(int operation, MediaContent mediaContent) {
         this.operation = operation;
-        this.media = mediaListCellData;
+        this.media = mediaContent;
     }
 
     public int getOperation() {
         return operation;
     }
 
-    public MediaListCellData getMedia() {
+    public MediaContent getMedia() {
         return media;
     }
 }

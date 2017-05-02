@@ -5,14 +5,14 @@ import java.io.Serializable;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 
-public class MediaListCellData implements Serializable {
+public class MediaContent implements Serializable {
 
     public int type = 0;
     public long id = -1;
     public String path = null;
     public int iconID = R.drawable.logo;
 
-    public MediaListCellData(String path) {
+    public MediaContent(String path) {
         this.path = path;
 
         if (path.endsWith(".jpg")) {
@@ -27,7 +27,7 @@ public class MediaListCellData implements Serializable {
         }
     }
 
-    public MediaListCellData(long id, String path) {
+    public MediaContent(long id, String path) {
         this(path);
         this.id = id;
     }

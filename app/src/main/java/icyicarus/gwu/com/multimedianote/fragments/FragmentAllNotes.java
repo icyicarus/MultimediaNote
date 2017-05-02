@@ -31,7 +31,7 @@ import butterknife.OnClick;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
@@ -96,10 +96,10 @@ public class FragmentAllNotes extends Fragment {
         Cursor cc;
         while (c.moveToNext()) {
             String picturePath = null;
-            LinkedList<MediaListCellData> mediaList = new LinkedList<>();
+            LinkedList<MediaContent> mediaList = new LinkedList<>();
             cc = readDatabase.query(NoteDB.TABLE_NAME_MEDIA, null, "owner=?", new String[]{c.getInt(c.getColumnIndex(NoteDB.COLUMN_ID)) + ""}, null, null, null, null);
             while (cc.moveToNext()) {
-                MediaListCellData media = new MediaListCellData(cc.getLong(cc.getColumnIndex(NoteDB.COLUMN_ID)), cc.getString(cc.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH)));
+                MediaContent media = new MediaContent(cc.getLong(cc.getColumnIndex(NoteDB.COLUMN_ID)), cc.getString(cc.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH)));
                 if (media.type == Variables.MEDIA_TYPE_PHOTO)
                     picturePath = media.path;
                 mediaList.add(media);
@@ -146,9 +146,9 @@ public class FragmentAllNotes extends Fragment {
         SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
         writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, "_id=?", new String[]{note.getId() + ""});
         writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, "owner=?", new String[]{note.getId() + ""});
-        LinkedList<MediaListCellData> mediaList = note.getMediaList();
+        LinkedList<MediaContent> mediaList = note.getMediaList();
         File file;
-        for (MediaListCellData media : mediaList) {
+        for (MediaContent media : mediaList) {
             file = new File(media.path);
             if (!file.delete()) {
                 final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);

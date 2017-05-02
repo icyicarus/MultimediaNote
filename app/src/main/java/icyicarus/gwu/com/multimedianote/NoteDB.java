@@ -21,6 +21,7 @@ public class NoteDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_MEDIA_OWNER_NOTE_ID = "owner";
 
     public static final String TABLE_NAME_ALARM = "alarm";
+    public static final String COLUMN_NAME_ALARM_TITLE = "title";
     public static final String COLUMN_NAME_ALARM_TIME = "time";
     public static final String COLUMN_NAME_ALARM_NOTEID = "noteid";
 
@@ -45,6 +46,7 @@ public class NoteDB extends SQLiteOpenHelper {
                 + ");");
         db.execSQL("CREATE TABLE " + TABLE_NAME_ALARM + "("
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_NAME_ALARM_TITLE + " TEXT NOT NULL DEFAULT \"\","
                 + COLUMN_NAME_ALARM_TIME + " TEXT NOT NULL DEFAULT \"\","
                 + COLUMN_NAME_ALARM_NOTEID + " INTEGER NOT NULL DEFAULT \"\""
                 + ");");

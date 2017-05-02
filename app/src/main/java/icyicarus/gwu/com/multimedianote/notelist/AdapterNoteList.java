@@ -38,7 +38,7 @@ import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
 
 public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
@@ -77,14 +77,13 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
         holder.noteTitle.setText(noteContent.getTitle());
         holder.noteDate.setText(noteContent.getDate());
         holder.noteDescription.setText(noteContent.getContent());
-        holder.setTag(noteContent);
         holder.buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LinkedList<MediaListCellData> medias = noteContent.getMediaList();
+                LinkedList<MediaContent> medias = noteContent.getMediaList();
                 final ArrayList<Uri> uris = new ArrayList<>();
                 if (medias != null && !medias.isEmpty())
-                    for (MediaListCellData data : medias)
+                    for (MediaContent data : medias)
                         uris.add(FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(data.path)));
 
                 final EditText emailField = new EditText(context);
@@ -152,6 +151,7 @@ public class AdapterNoteList extends RecyclerView.Adapter<ViewHolderNoteList> {
                                                         sb.append(0);
                                                     sb.append(minute).append(":00");
 
+                                                    cv.put(NoteDB.COLUMN_NAME_ALARM_TITLE, noteContent.getTitle());
                                                     cv.put(NoteDB.COLUMN_NAME_ALARM_TIME, sb.toString());
                                                     int alarmID = (int) writeDatabase.insert(NoteDB.TABLE_NAME_ALARM, null, cv);
                                                     AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

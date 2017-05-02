@@ -18,40 +18,41 @@ import icyicarus.gwu.com.multimedianote.Variables;
 public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> {
 
     private Context context;
-    private List<MediaListCellData> mediaList;
+    private List<MediaContent> mediaList;
     private deleteMediaListener deleteListener = null;
 
-    public AdapterMediaList(Context context, List<MediaListCellData> mediaList) {
+    public AdapterMediaList(Context context, List<MediaContent> mediaList) {
         this.context = context;
         this.mediaList = mediaList;
     }
 
     @Override
     public ViewHolderMediaList onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.cell_media_list, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cell_media_list, parent, false);
         return new ViewHolderMediaList(v);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolderMediaList holder, final int position) {
-        final MediaListCellData mediaListCellData = mediaList.get(position);
+        final MediaContent mediaContent = mediaList.get(position);
         Uri uri;
-        if (mediaListCellData.type == Variables.MEDIA_TYPE_PHOTO)
-            uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaListCellData.path));
-        else if (mediaListCellData.type == Variables.MEDIA_TYPE_VIDEO)
-            uri = Uri.parse("res://" + context.getPackageName() + "/" + R.id.button_note_add_video);
+        if (mediaContent.type == Variables.MEDIA_TYPE_PHOTO)
+            uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaContent.path));
+        else if (mediaContent.type == Variables.MEDIA_TYPE_VIDEO)
+            uri = Uri.parse("res://" + context.getPackageName() + "/" + R.drawable.img_video);
+//            uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaContent.path));
         else
-            uri = Uri.parse("res://" + context.getPackageName() + "/" + R.id.button_note_add_audio);
+            uri = Uri.parse("res://" + context.getPackageName() + "/" + R.drawable.img_audio);
         holder.mediaCellImage.setImageURI(uri);
-        String[] pathSplit = mediaListCellData.path.split("/");
+        String[] pathSplit = mediaContent.path.split("/");
         holder.mediaCellPath.setText(pathSplit[pathSplit.length - 1]);
         holder.mediaCellContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaListCellData.path));
-                switch (mediaListCellData.type) {
+                Uri uri = FileProvider.getUriForFile(context, Variables.FILE_PROVIDER_AUTHORITIES, new File(mediaContent.path));
+                switch (mediaContent.type) {
                     case Variables.MEDIA_TYPE_PHOTO:
                         i.setDataAndType(uri, "image/jpg");
                         break;
@@ -71,7 +72,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
         holder.mediaCellContainer.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                deleteListener.onMediaDeleteListener(mediaListCellData, position);
+                deleteListener.onMediaDeleteListener(mediaContent, position);
                 return true;
             }
         });
@@ -83,7 +84,7 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     }
 
     public interface deleteMediaListener {
-        void onMediaDeleteListener(MediaListCellData media, int position);
+        void onMediaDeleteListener(MediaContent media, int position);
     }
 
     public void setOnMediaDeleteListener(deleteMediaListener listener) {

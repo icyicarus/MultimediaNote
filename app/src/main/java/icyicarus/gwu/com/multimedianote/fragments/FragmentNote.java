@@ -45,7 +45,7 @@ import icyicarus.gwu.com.multimedianote.OperationDetail;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.medialist.AdapterMediaList;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.views.MapView;
 
@@ -69,7 +69,7 @@ public class FragmentNote extends Fragment {
     @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;
     @BindView(R.id.snackbar_container_note) CoordinatorLayout snackbarContainer;
 
-    private LinkedList<MediaListCellData> mediaListData = null;
+    private LinkedList<MediaContent> mediaListData = null;
     private File f;
     private Boolean showOKButton = false;
     private LinkedList<OperationDetail> operationQueue = new LinkedList<>();
@@ -108,7 +108,7 @@ public class FragmentNote extends Fragment {
         AdapterMediaList adapterMediaList = new AdapterMediaList(getContext(), mediaListData);
         adapterMediaList.setOnMediaDeleteListener(new AdapterMediaList.deleteMediaListener() {
             @Override
-            public void onMediaDeleteListener(MediaListCellData media, int position) {
+            public void onMediaDeleteListener(MediaContent media, int position) {
                 mediaListData.remove(media);
                 mediaList.getAdapter().notifyItemRemoved(position);
 //                deleteMedia(media);
@@ -172,7 +172,7 @@ public class FragmentNote extends Fragment {
 
     private void clearQueue(SQLiteDatabase writeDatabase) {
 //        if (mediaListData.size() > 0) {
-//            for (MediaListCellData media : mediaListData) {
+//            for (MediaContent media : mediaListData) {
 //                if (media.id == -1) {
 //                    ContentValues mediaContent = new ContentValues();
 //                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
@@ -185,7 +185,7 @@ public class FragmentNote extends Fragment {
             OperationDetail operationDetail = operationQueue.poll();
 //        }
 //        for (OperationDetail operationDetail : operationQueue) {
-            MediaListCellData media = operationDetail.getMedia();
+            MediaContent media = operationDetail.getMedia();
             if (operationDetail.getOperation() == OperationDetail.OPERATION_ADD) {
                 ContentValues mediaContent = new ContentValues();
                 mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
@@ -233,7 +233,7 @@ public class FragmentNote extends Fragment {
 //            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "New Note");
 //        else
 //            noteContent.put(NoteDB.COLUMN_NAME_NOTE_TITLE, fragmentNoteEditTextTitle.getText().toString());
-//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_DATE, noteData != null ? noteData.getDate() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+//        noteContent.put(NoteDB.COLUMN_NAME_NOTE_DATE, noteData != null ? noteData.getTime() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
 //        noteContent.put(NoteDB.COLUMN_NAME_NOTE_CONTENT, fragmentNoteEditTextContent.getText().toString());
 //        noteContent.put(NoteDB.COLUMN_NAME_NOTE_LATITUDE, latitude);
 //        noteContent.put(NoteDB.COLUMN_NAME_NOTE_LONGITUDE, longitude);
@@ -254,7 +254,7 @@ public class FragmentNote extends Fragment {
 //        }
 //
 //        if (mediaListData.size() > 0) {
-//            for (MediaListCellData media : mediaListData) {
+//            for (MediaContent media : mediaListData) {
 //                if (media.id == -1) {
 //                    ContentValues mediaContent = new ContentValues();
 //                    mediaContent.put(NoteDB.COLUMN_NAME_MEDIA_PATH, media.path);
@@ -342,7 +342,7 @@ public class FragmentNote extends Fragment {
             case MEDIA_TYPE_VIDEO:
             case MEDIA_TYPE_AUDIO:
                 if (resultCode == RESULT_OK) {
-                    MediaListCellData media = new MediaListCellData(f.getAbsolutePath());
+                    MediaContent media = new MediaContent(f.getAbsolutePath());
                     mediaListData.add(media);
                     mediaList.getAdapter().notifyItemInserted(mediaListData.size());
                     operationQueue.add(new OperationDetail(OperationDetail.OPERATION_ADD, media));

@@ -18,7 +18,7 @@ import java.util.Locale;
 
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.Variables;
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 
 public class BootReceiver extends BroadcastReceiver {
@@ -34,9 +34,9 @@ public class BootReceiver extends BroadcastReceiver {
                 cc = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, NoteDB.COLUMN_ID + "=?", new String[]{noteID + ""}, null, null, null, null);
                 cc.moveToNext();
                 ccc = readDatabase.query(NoteDB.TABLE_NAME_MEDIA, null, NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID + "=?", new String[]{noteID + ""}, null, null, null, null);
-                LinkedList<MediaListCellData> mediaList = new LinkedList<>();
+                LinkedList<MediaContent> mediaList = new LinkedList<>();
                 while (ccc.moveToNext())
-                    mediaList.add(new MediaListCellData(ccc.getString(ccc.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH))));
+                    mediaList.add(new MediaContent(ccc.getString(ccc.getColumnIndex(NoteDB.COLUMN_NAME_MEDIA_PATH))));
                 NoteContent noteContent = new NoteContent(
                         cc.getInt(cc.getColumnIndex(NoteDB.COLUMN_ID)),
                         cc.getString(cc.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)),

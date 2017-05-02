@@ -3,7 +3,7 @@ package icyicarus.gwu.com.multimedianote.notelist;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-import icyicarus.gwu.com.multimedianote.medialist.MediaListCellData;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
 
 public class NoteContent implements Serializable {
     private long id;
@@ -11,11 +11,11 @@ public class NoteContent implements Serializable {
     private String date;
     private String content;
     private String picturePath;
-    private LinkedList<MediaListCellData> mediaList;
+    private LinkedList<MediaContent> mediaList;
     private String latitude;
     private String longitude;
 
-    public NoteContent(long id, String title, String date, String content, LinkedList<MediaListCellData> mediaList, String picturePath, String latitude, String longitude) {
+    public NoteContent(long id, String title, String date, String content, LinkedList<MediaContent> mediaList, String picturePath, String latitude, String longitude) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -43,7 +43,7 @@ public class NoteContent implements Serializable {
         return content;
     }
 
-    public LinkedList<MediaListCellData> getMediaList() {
+    public LinkedList<MediaContent> getMediaList() {
         return mediaList;
     }
 

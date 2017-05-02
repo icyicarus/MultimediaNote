@@ -1,5 +1,12 @@
 # MultimediaNote 工作日志
 
+### 05/02/2017
+##### DONE
+* 闹钟列表
+##### TODO
+* 把Adapter里面写的点击事件分离出来，并尽量移除Adapter对context持有的引用
+* Code Review
+
 ### 04/29/2017
 ##### DONE
 * 重启后可以重新注册闹钟了

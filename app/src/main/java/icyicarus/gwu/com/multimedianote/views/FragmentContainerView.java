@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.stetho.Stetho;
 import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
@@ -32,6 +31,7 @@ import butterknife.ButterKnife;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAbout;
+import icyicarus.gwu.com.multimedianote.fragments.FragmentAlarm;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAllNotes;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentCalendar;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentFeedback;
@@ -50,9 +50,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         if (LeakCanary.isInAnalyzerProcess(this))
             return;
         LeakCanary.install(getApplication());
-        Stetho.initializeWithDefaults(this);
 
-        setContentView(R.layout.activity_user_interface);
+        setContentView(R.layout.view_user_interface);
         ButterKnife.bind(this);
         Fresco.initialize(getApplicationContext());
 
@@ -143,7 +142,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentCalendar()).addToBackStack(null).commit();
                 break;
             case R.id.nav_alarm:
-//                    setTitle("Alarm");
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAlarm()).addToBackStack(null).commit();
                 break;
             case R.id.nav_settings:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings()).addToBackStack(null).commit();

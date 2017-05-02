@@ -26,17 +26,11 @@ class ViewHolderNoteList extends RecyclerView.ViewHolder {
     @BindView(R.id.button_set_alarm) AppCompatButton buttonAlarm;
     @BindView(R.id.button_edit) AppCompatButton buttonEdit;
 
-    private NoteContent note;
-
     ViewHolderNoteList(View itemView, Context context) {
         super(itemView);
         ButterKnife.bind(this, itemView);
 
         Typeface iconFont = FontManager.getTypeface(context, FontManager.FONT_AWESOME);
         FontManager.markAsIconContainer(itemView, iconFont);
-    }
-
-    void setTag(NoteContent noteContent) {
-        note = noteContent;
     }
 }
