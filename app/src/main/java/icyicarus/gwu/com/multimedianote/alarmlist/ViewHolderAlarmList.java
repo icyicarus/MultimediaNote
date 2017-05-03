@@ -17,7 +17,7 @@ class ViewHolderAlarmList extends RecyclerView.ViewHolder {
     @BindView(R.id.alarm_date) AppCompatTextView alarmTime;
     @BindView(R.id.button_delete_alarm) AppCompatButton buttonDeleteAlarm;
 
-    public ViewHolderAlarmList(View itemView) {
+    ViewHolderAlarmList(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
 

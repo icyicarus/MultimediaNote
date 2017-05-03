@@ -1,6 +1,5 @@
 package icyicarus.gwu.com.multimedianote.notelist;
 
-import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
@@ -26,11 +25,11 @@ class ViewHolderNoteList extends RecyclerView.ViewHolder {
     @BindView(R.id.button_set_alarm) AppCompatButton buttonAlarm;
     @BindView(R.id.button_edit) AppCompatButton buttonEdit;
 
-    ViewHolderNoteList(View itemView, Context context) {
+    ViewHolderNoteList(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
 
-        Typeface iconFont = FontManager.getTypeface(context, FontManager.FONT_AWESOME);
+        Typeface iconFont = FontManager.getTypeface(itemView.getContext(), FontManager.FONT_AWESOME);
         FontManager.markAsIconContainer(itemView, iconFont);
     }
 }
