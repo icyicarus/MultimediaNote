@@ -21,15 +21,14 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     private ClickMediaListener clickListener = null;
     private DeleteMediaListener deleteListener = null;
 
-    public AdapterMediaList(Context context, List<MediaContent> mediaList) {
-        this.context = context;
+    public AdapterMediaList(List<MediaContent> mediaList) {
         this.mediaList = mediaList;
     }
 
     @Override
     public ViewHolderMediaList onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cell_media_list, parent, false);
-        return new ViewHolderMediaList(v);
+        context = parent.getContext();
+        return new ViewHolderMediaList(LayoutInflater.from(parent.getContext()).inflate(R.layout.cell_media_list, parent, false));
     }
 
     @Override

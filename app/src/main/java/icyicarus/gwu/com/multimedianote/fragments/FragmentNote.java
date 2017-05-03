@@ -105,7 +105,7 @@ public class FragmentNote extends Fragment {
             mediaListData = new LinkedList<>();
 
         mediaList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        AdapterMediaList adapterMediaList = new AdapterMediaList(getContext(), mediaListData);
+        AdapterMediaList adapterMediaList = new AdapterMediaList(mediaListData);
         adapterMediaList.setOnMediaClickListener(new AdapterMediaList.ClickMediaListener() {
             @Override
             public void onMediaClickListener(MediaContent mediaContent) {
