@@ -4,9 +4,9 @@
 ##### DONE
 * 闹钟列表
 * 把Adapter里面写的点击事件分离出来，并尽量移除Adapter对context持有的引用
-##### TODO
 * 删除时的确认框
-* Code Review
+##### TODO
+* 快速添加入口
 
 ### 04/29/2017
 ##### DONE

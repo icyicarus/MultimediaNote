@@ -233,10 +233,22 @@ public class FragmentAllNotes extends Fragment {
         });
         adapterNoteList.setOnNoteDeleteListener(new AdapterNoteList.DeleteNoteListener() {
             @Override
-            public void onNoteDeleteListener(NoteContent note, int position) {
-                query.remove(note);
-                noteList.getAdapter().notifyItemRemoved(position);
-                deleteNote(note);
+            public void onNoteDeleteListener(final NoteContent note, final int position) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Delete this note?")
+                        .setMessage("This cannot be reversed")
+                        .setCancelable(false)
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                query.remove(note);
+                                noteList.getAdapter().notifyItemRemoved(position);
+                                deleteNote(note);
+                            }
+                        })
+                        .create()
+                        .show();
             }
         });
         adapterNoteList.setOnNoteEditListener(new AdapterNoteList.EditNoteListener() {

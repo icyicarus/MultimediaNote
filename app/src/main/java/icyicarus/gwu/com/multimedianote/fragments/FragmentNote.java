@@ -3,6 +3,7 @@ package icyicarus.gwu.com.multimedianote.fragments;
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +17,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -130,10 +132,22 @@ public class FragmentNote extends Fragment {
         });
         adapterMediaList.setOnMediaDeleteListener(new AdapterMediaList.DeleteMediaListener() {
             @Override
-            public void onMediaDeleteListener(MediaContent media, int position) {
-                mediaListData.remove(media);
-                mediaList.getAdapter().notifyItemRemoved(position);
-                operationQueue.add(new OperationDetail(OperationDetail.OPERATION_DEL, media));
+            public void onMediaDeleteListener(final MediaContent media, final int position) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Delete this media?")
+                        .setMessage("This can be reversed by not saving the note")
+                        .setCancelable(false)
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mediaListData.remove(media);
+                                mediaList.getAdapter().notifyItemRemoved(position);
+                                operationQueue.add(new OperationDetail(OperationDetail.OPERATION_DEL, media));
+                            }
+                        })
+                        .create()
+                        .show();
             }
         });
         mediaList.setAdapter(adapterMediaList);

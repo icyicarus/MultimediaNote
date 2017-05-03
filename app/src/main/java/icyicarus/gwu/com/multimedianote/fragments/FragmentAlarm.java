@@ -3,12 +3,14 @@ package icyicarus.gwu.com.multimedianote.fragments;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -56,19 +58,31 @@ public class FragmentAlarm extends Fragment {
         final AdapterAlarmList adapterAlarmList = new AdapterAlarmList(query);
         adapterAlarmList.setOnAlarmDeleteListener(new AdapterAlarmList.deleteAlarmListener() {
             @Override
-            public void onAlarmDeleteListener(AlarmContent alarmContent, int position) {
-                Intent i = new Intent(getContext(), AlarmReceiver.class);
-                AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-                PendingIntent pi = PendingIntent.getBroadcast(getContext(), alarmContent.getId(), i, 0);
-                try {
-                    am.set(AlarmManager.RTC_WAKEUP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(alarmContent.getTime()).getTime(), pi);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                adapterAlarmList.notifyItemRemoved(position);
-                adapterAlarmList.removeItem(position);
-                SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
-                writeDatabase.delete(NoteDB.TABLE_NAME_ALARM, NoteDB.COLUMN_ID + "=?", new String[]{alarmContent.getId() + ""});
+            public void onAlarmDeleteListener(final AlarmContent alarmContent, final int position) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Delete this Alarm?")
+                        .setMessage("This cannot be reversed")
+                        .setCancelable(false)
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent i = new Intent(getContext(), AlarmReceiver.class);
+                                AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+                                PendingIntent pi = PendingIntent.getBroadcast(getContext(), alarmContent.getId(), i, 0);
+                                try {
+                                    am.set(AlarmManager.RTC_WAKEUP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(alarmContent.getTime()).getTime(), pi);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                adapterAlarmList.notifyItemRemoved(position);
+                                adapterAlarmList.removeItem(position);
+                                SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
+                                writeDatabase.delete(NoteDB.TABLE_NAME_ALARM, NoteDB.COLUMN_ID + "=?", new String[]{alarmContent.getId() + ""});
+                            }
+                        })
+                        .create()
+                        .show();
             }
         });
         alarmList.setAdapter(adapterAlarmList);
