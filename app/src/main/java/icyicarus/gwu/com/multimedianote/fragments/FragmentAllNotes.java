@@ -72,15 +72,6 @@ public class FragmentAllNotes extends Fragment {
     private String queryDate;
     private File f;
 
-    @OnClick(R.id.clear)
-    void clearButtonClick() {
-        SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
-        writeDatabase.delete(NoteDB.TABLE_NAME_NOTES, null, null);
-        writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, null, null);
-        ((AdapterNoteList) noteList.getAdapter()).getNotes().clear();
-        noteList.getAdapter().notifyDataSetChanged();
-    }
-
     @OnClick({R.id.button_all_note_add_note, R.id.button_all_note_add_photo, R.id.button_all_note_add_video, R.id.button_all_note_add_audio})
     void allNoteViewButtonClick(View v) {
         Uri uri;
@@ -364,6 +355,7 @@ public class FragmentAllNotes extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
+            AdapterNoteList adapter = (AdapterNoteList) noteList.getAdapter();
             SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
             SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
             String today = new SimpleDateFormat("yyyy-MM-dd%", Locale.getDefault()).format(new Date(System.currentTimeMillis()));
@@ -371,7 +363,6 @@ public class FragmentAllNotes extends Fragment {
             int ownerId = -1;
             while (c.moveToNext())
                 ownerId = (int) c.getLong(c.getColumnIndex(NoteDB.COLUMN_ID));
-            c.close();
             if (ownerId == -1) { // no today note
                 ContentValues cv = new ContentValues();
                 cv.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Quick Note");
@@ -381,12 +372,29 @@ public class FragmentAllNotes extends Fragment {
                 cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
                 cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
                 writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+                LinkedList<MediaContent> list = new LinkedList<>();
+                list.add(new MediaContent(f.getAbsolutePath()));
+                NoteContent newNote = new NoteContent(
+                        ownerId,
+                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)),
+                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_DATE)),
+                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT)),
+                        list,
+                        requestCode == MEDIA_TYPE_PHOTO ? f.getAbsolutePath() : null,
+                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LATITUDE)),
+                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LONGITUDE))
+                );
+                adapter.getNotes().add(newNote);
+                adapter.notifyItemInserted(adapter.getItemCount() - 1);
             } else { // have today note
                 ContentValues cv = new ContentValues();
                 cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
                 cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
                 writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+                adapter.getNotes().get(adapter.getItemCount() - 1).getMediaList().add(new MediaContent(f.getAbsolutePath()));
+                adapter.notifyItemChanged(adapter.getItemCount() - 1);
             }
+            c.close();
         } else {
             if (requestCode != MEDIA_TYPE_PHOTO && !f.delete()) {
                 final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);

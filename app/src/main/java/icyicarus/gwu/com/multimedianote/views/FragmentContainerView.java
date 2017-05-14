@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
@@ -53,7 +54,9 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
 
         setContentView(R.layout.view_user_interface);
         ButterKnife.bind(this);
-        Fresco.initialize(getApplicationContext());
+
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this).setDownsampleEnabled(true).build();
+        Fresco.initialize(getApplicationContext(), config);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
