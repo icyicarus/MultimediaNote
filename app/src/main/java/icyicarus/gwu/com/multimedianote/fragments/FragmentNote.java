@@ -52,20 +52,14 @@ import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.views.MapView;
 
 import static android.app.Activity.RESULT_OK;
-import static icyicarus.gwu.com.multimedianote.Variables.ADD_LOCATION;
-import static icyicarus.gwu.com.multimedianote.Variables.EXTRA_NOTE_LATITUDE;
-import static icyicarus.gwu.com.multimedianote.Variables.EXTRA_NOTE_LONGITUDE;
-import static icyicarus.gwu.com.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_AUDIO;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_PHOTO;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_VIDEO;
+import static icyicarus.gwu.com.multimedianote.Variables.*;
 
 public class FragmentNote extends Fragment {
     @BindView(R.id.fragment_note_edit_text_title) EditText fragmentNoteEditTextTitle;
     @BindView(R.id.fragment_note_edit_text_content) EditText fragmentNoteEditTextContent;
     @BindView(R.id.button_note_save) AppCompatButton buttonNoteSave;
-    @BindView(R.id.button_note_add_photo) AppCompatButton buttonNoteAddPhoto;
-    @BindView(R.id.button_note_add_video) AppCompatButton buttonNoteAddVideo;
+    //    @BindView(R.id.button_note_add_photo) AppCompatButton buttonNoteAddPhoto;
+//    @BindView(R.id.button_note_add_video) AppCompatButton buttonNoteAddVideo;
     @BindView(R.id.button_note_add_audio) AppCompatButton buttonNoteAddAudio;
     @BindView(R.id.button_location) AppCompatButton buttonLocation;
     @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;

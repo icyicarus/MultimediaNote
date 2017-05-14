@@ -9,15 +9,16 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -38,10 +39,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
+import cafe.adriel.androidaudiorecorder.model.AudioChannel;
+import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
+import cafe.adriel.androidaudiorecorder.model.AudioSource;
+import icyicarus.gwu.com.multimedianote.FontManager;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
 import icyicarus.gwu.com.multimedianote.Variables;
@@ -50,20 +57,20 @@ import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
 
+import static android.app.Activity.RESULT_OK;
+import static icyicarus.gwu.com.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_AUDIO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_PHOTO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_VIDEO;
+
 public class FragmentAllNotes extends Fragment {
 
-    @BindView(R.id.button) AppCompatButton button;
-    @BindView(R.id.clear) AppCompatButton clear;
     @BindView(R.id.note_list) RecyclerView noteList;
     @BindView(R.id.snackbar_container_all_note) CoordinatorLayout snackbarContainer;
 
     private CalendarDay calendarDay;
     private String queryDate;
-
-    @OnClick(R.id.button)
-    void testButtonClick() {
-        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
-    }
+    private File f;
 
     @OnClick(R.id.clear)
     void clearButtonClick() {
@@ -72,6 +79,52 @@ public class FragmentAllNotes extends Fragment {
         writeDatabase.delete(NoteDB.TABLE_NAME_MEDIA, null, null);
         ((AdapterNoteList) noteList.getAdapter()).getNotes().clear();
         noteList.getAdapter().notifyDataSetChanged();
+    }
+
+    @OnClick({R.id.button_all_note_add_note, R.id.button_all_note_add_photo, R.id.button_all_note_add_video, R.id.button_all_note_add_audio})
+    void allNoteViewButtonClick(View v) {
+        Uri uri;
+        Intent i;
+        switch (v.getId()) {
+            case R.id.button_all_note_add_note:
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
+                break;
+            case R.id.button_all_note_add_photo:
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
+                uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
+                i = new Intent();
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                i.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(i, MEDIA_TYPE_PHOTO);
+                break;
+            case R.id.button_all_note_add_video:
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".mp4");
+                uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
+                i = new Intent();
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                i.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(i, MEDIA_TYPE_VIDEO);
+                break;
+            case R.id.button_all_note_add_audio:
+                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".wav");
+                Random rnd = new Random();
+                int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                AndroidAudioRecorder.with(this)
+                        .setFilePath(f.getAbsolutePath())
+                        .setColor(color)
+                        .setRequestCode(MEDIA_TYPE_AUDIO)
+                        .setSource(AudioSource.MIC)
+                        .setChannel(AudioChannel.STEREO)
+                        .setSampleRate(AudioSampleRate.HZ_48000)
+                        .setAutoStart(false)
+                        .setKeepDisplayOn(true)
+                        .recordFromFragment();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -99,6 +152,9 @@ public class FragmentAllNotes extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_all_notes, container, false);
         ButterKnife.bind(this, v);
+
+        Typeface iconFont = FontManager.getTypeface(getContext(), FontManager.FONT_AWESOME);
+        FontManager.markAsIconContainer(v.findViewById(R.id.container_all_note), iconFont);
 
         final ArrayList<NoteContent> query = new ArrayList<>();
         SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
@@ -142,7 +198,7 @@ public class FragmentAllNotes extends Fragment {
                 final ArrayList<Uri> uris = new ArrayList<>();
                 if (medias != null && !medias.isEmpty())
                     for (MediaContent data : medias)
-                        uris.add(FileProvider.getUriForFile(getContext(), Variables.FILE_PROVIDER_AUTHORITIES, new File(data.path)));
+                        uris.add(FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, new File(data.path)));
 
                 final EditText emailField = new EditText(getContext());
                 emailField.setHint("email@example.com");
@@ -302,5 +358,47 @@ public class FragmentAllNotes extends Fragment {
             am.cancel(pi);
         }
         c.close();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
+            SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
+            String today = new SimpleDateFormat("yyyy-MM-dd%", Locale.getDefault()).format(new Date(System.currentTimeMillis()));
+            Cursor c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, "date like ?", new String[]{today}, null, null, null, null);
+            int ownerId = -1;
+            while (c.moveToNext())
+                ownerId = (int) c.getLong(c.getColumnIndex(NoteDB.COLUMN_ID));
+            c.close();
+            if (ownerId == -1) { // no today note
+                ContentValues cv = new ContentValues();
+                cv.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Quick Note");
+                cv.put(NoteDB.COLUMN_NAME_NOTE_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+                ownerId = (int) writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, cv);
+                cv = new ContentValues();
+                cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
+                cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
+                writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+            } else { // have today note
+                ContentValues cv = new ContentValues();
+                cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
+                cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
+                writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+            }
+        } else {
+            if (requestCode != MEDIA_TYPE_PHOTO && !f.delete()) {
+                final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
+                snackbar.setAction("OK", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                }).setActionTextColor(Color.WHITE);
+                snackbar.setText("File not deleted, please delete it manually");
+                snackbar.show();
+            }
+        }
     }
 }
