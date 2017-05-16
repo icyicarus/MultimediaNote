@@ -299,6 +299,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        showToolbar = false;
         fabToolbarLayout.hide();
         if (resultCode == RESULT_OK) {
             if (noteFragment == null) {
