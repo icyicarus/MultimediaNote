@@ -54,7 +54,7 @@ public class FragmentNote extends Fragment {
     @BindView(R.id.fragment_note_media_list) RecyclerView mediaList;
 
     private LinkedList<MediaContent> mediaListData = null;
-    private Boolean showOKButton = false;
+    private Boolean showSaveDialog = false;
     private LinkedList<OperationDetail> operationQueue = new LinkedList<>();
     private String latitude = " ";
     private String longitude = " ";
@@ -68,7 +68,7 @@ public class FragmentNote extends Fragment {
             noteData = (NoteContent) getArguments().getSerializable(Variables.EXTRA_NOTE_DATA);
             getActivity().setTitle(noteData.getTitle());
         }
-        showOKButton = getActivity().getPreferences(Context.MODE_PRIVATE).getBoolean(Variables.SOB, false);
+        showSaveDialog = getActivity().getPreferences(Context.MODE_PRIVATE).getBoolean(Variables.SSD, false);
         ((FABToolbarLayout) getActivity().findViewById(R.id.fab_toolbar)).hide();
     }
 
@@ -193,19 +193,36 @@ public class FragmentNote extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (showOKButton) {
-            for (OperationDetail operationDetail : operationQueue) {
-                if (operationDetail.getOperation() == OperationDetail.OPERATION_ADD) {
-                    File file = new File(operationDetail.getMedia().path);
-                    if (!file.delete())
-                        Logger.e("File not deleted, please delete it manually");
-                }
-            }
+    public void onPause() {
+        if (showSaveDialog) {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Save Note?")
+                    .setMessage("Unsaved changes will be discarded")
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            for (OperationDetail operationDetail : operationQueue) {
+                                if (operationDetail.getOperation() == OperationDetail.OPERATION_ADD) {
+                                    File file = new File(operationDetail.getMedia().path);
+                                    if (!file.delete())
+                                        Logger.e("File not deleted, please delete it manually");
+                                }
+                            }
+                        }
+                    })
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveNote();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
         } else
             saveNote();
+        super.onPause();
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

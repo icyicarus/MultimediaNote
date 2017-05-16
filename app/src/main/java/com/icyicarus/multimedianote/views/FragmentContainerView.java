@@ -3,7 +3,6 @@ package com.icyicarus.multimedianote.views;
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -42,7 +41,6 @@ import com.icyicarus.multimedianote.fragments.FragmentAllNotes;
 import com.icyicarus.multimedianote.fragments.FragmentCalendar;
 import com.icyicarus.multimedianote.fragments.FragmentFeedback;
 import com.icyicarus.multimedianote.fragments.FragmentNote;
-import com.icyicarus.multimedianote.fragments.FragmentSettings;
 import com.icyicarus.multimedianote.medialist.AdapterMediaList;
 import com.icyicarus.multimedianote.medialist.MediaContent;
 import com.icyicarus.multimedianote.notelist.AdapterNoteList;
@@ -68,21 +66,17 @@ import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
 
-import static com.icyicarus.multimedianote.Variables.BGC;
-import static com.icyicarus.multimedianote.Variables.CBG;
 import static com.icyicarus.multimedianote.Variables.EXTRA_NOTE_DATA;
 import static com.icyicarus.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
 import static com.icyicarus.multimedianote.Variables.MEDIA_TYPE_AUDIO;
 import static com.icyicarus.multimedianote.Variables.MEDIA_TYPE_PHOTO;
 import static com.icyicarus.multimedianote.Variables.MEDIA_TYPE_VIDEO;
-import static com.icyicarus.multimedianote.Variables.SOB;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_ABOUT;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_ALARM;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_ALL_NOTE;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_CALENDAR;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_FEEDBACK;
 import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_NOTE;
-import static com.icyicarus.multimedianote.Variables.TAG_FRAGMENT_SETTINGS;
 
 public class FragmentContainerView extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.nav_view) NavigationView navigationView;
@@ -163,13 +157,13 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("All Notes");
-        SharedPreferences userPreferences = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor editor = userPreferences.edit();
-        editor.putBoolean(SOB, userPreferences.getBoolean(SOB, false));
-        editor.putBoolean(CBG, userPreferences.getBoolean(CBG, false));
-        editor.putString(BGC, userPreferences.getString(BGC, "000000"));
-        editor.apply();
-        editor.commit();
+//        SharedPreferences userPreferences = getPreferences(MODE_PRIVATE);
+//        SharedPreferences.Editor editor = userPreferences.edit();
+//        editor.putBoolean(SSD, userPreferences.getBoolean(SSD, false));
+//        editor.putBoolean(CBG, userPreferences.getBoolean(CBG, false));
+//        editor.putString(BGC, userPreferences.getString(BGC, "000000"));
+//        editor.apply();
+//        editor.commit();
 
         defaultFragment = new FragmentAllNotes();
         getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, defaultFragment, TAG_FRAGMENT_ALL_NOTE).commit();
@@ -263,9 +257,9 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
             case R.id.nav_alarm:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAlarm(), TAG_FRAGMENT_ALARM).addToBackStack(null).commit();
                 break;
-            case R.id.nav_settings:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings(), TAG_FRAGMENT_SETTINGS).addToBackStack(null).commit();
-                break;
+//            case R.id.nav_settings:
+//                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings(), TAG_FRAGMENT_SETTINGS).addToBackStack(null).commit();
+//                break;
             case R.id.nav_help_and_feedback:
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentFeedback(), TAG_FRAGMENT_FEEDBACK).addToBackStack(null).commit();
                 break;

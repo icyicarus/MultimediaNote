@@ -29,7 +29,7 @@ public class FragmentSettings extends Fragment {
         userPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         View v = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, v);
-        switchShowOKButton.setChecked(userPreferences.getBoolean(Variables.SOB, false));
+        switchShowOKButton.setChecked(userPreferences.getBoolean(Variables.SSD, false));
         return v;
     }
 
@@ -38,7 +38,7 @@ public class FragmentSettings extends Fragment {
         super.onDetach();
 
         SharedPreferences.Editor editor = userPreferences.edit();
-        editor.putBoolean(Variables.SOB, switchShowOKButton.isChecked());
+        editor.putBoolean(Variables.SSD, switchShowOKButton.isChecked());
         editor.apply();
         editor.commit();
     }

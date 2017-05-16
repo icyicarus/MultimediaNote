@@ -20,10 +20,10 @@
     <group
         android:id="@+id/drawer_group_utilities"
         android:checkableBehavior="all">
-        <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_settings"
-            android:title="Settings" />
+        <!--<item-->
+        <!--android:id="@+id/nav_settings"-->
+        <!--android:icon="@drawable/ic_settings"-->
+        <!--android:title="Settings" />-->
         <item
             android:id="@+id/nav_help_and_feedback"
             android:icon="@drawable/ic_feedback"
