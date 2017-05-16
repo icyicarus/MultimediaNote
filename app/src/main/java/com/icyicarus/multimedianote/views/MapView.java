@@ -131,15 +131,16 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
 //    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 //        AndPermission.onRequestPermissionsResult(MapView.this, requestCode, permissions, grantResults, new PermissionListener() {
 //            @Override
-//            public void onSucceed(int requestCode) {
+//            public void onSucceed(int requestCode, List<String> grantPermissions) {
 //                onMapReady(mGoogleMap);
 //            }
 //
 //            @Override
-//            public void onFailed(int requestCode) {
+//            public void onFailed(int requestCode, List<String> deniedPermissions) {
 //                Toast.makeText(MapView.this, "Permission Denied, Please Check", Toast.LENGTH_SHORT).show();
 //                finish();
 //            }
+//
 //        });
 //    }
 
@@ -259,6 +260,7 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Logger.e("error");
                 Logger.e(error.toString());
             }
         });

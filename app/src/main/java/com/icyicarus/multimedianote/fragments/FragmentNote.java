@@ -32,6 +32,7 @@ import com.icyicarus.multimedianote.Variables;
 import com.icyicarus.multimedianote.medialist.AdapterMediaList;
 import com.icyicarus.multimedianote.medialist.MediaContent;
 import com.icyicarus.multimedianote.notelist.NoteContent;
+import com.icyicarus.multimedianote.views.MapView;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
@@ -43,9 +44,12 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static android.app.Activity.RESULT_OK;
 import static com.icyicarus.multimedianote.Variables.ADD_LOCATION;
+import static com.icyicarus.multimedianote.Variables.EXTRA_NOTE_LATITUDE;
+import static com.icyicarus.multimedianote.Variables.EXTRA_NOTE_LONGITUDE;
 
 public class FragmentNote extends Fragment {
     @BindView(R.id.fragment_note_edit_text_title) EditText fragmentNoteEditTextTitle;
@@ -223,6 +227,20 @@ public class FragmentNote extends Fragment {
         super.onPause();
     }
 
+    @OnClick(R.id.button_location)
+    void noteViewButtonClick(View v) {
+        Intent i;
+        switch (v.getId()) {
+            case R.id.button_location:
+                i = new Intent(getActivity(), MapView.class);
+                i.putExtra(EXTRA_NOTE_LATITUDE, latitude);
+                i.putExtra(EXTRA_NOTE_LONGITUDE, longitude);
+                startActivityForResult(i, ADD_LOCATION);
+                break;
+            default:
+                break;
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -250,5 +268,19 @@ public class FragmentNote extends Fragment {
 
     public LinkedList<OperationDetail> getOperationQueue() {
         return operationQueue;
+    }
+
+    public void setLocation(String latitude, String longitude, int resultCode) {
+        if (resultCode == RESULT_OK) {
+            Logger.e("ok");
+            this.latitude = latitude;
+            this.longitude = longitude;
+            buttonLocation.setTextColor(getResources().getColor(R.color.royalBlue));
+        } else {
+            Logger.e("cancel");
+            this.latitude = " ";
+            this.longitude = " ";
+            buttonLocation.setTextColor(Color.GRAY);
+        }
     }
 }

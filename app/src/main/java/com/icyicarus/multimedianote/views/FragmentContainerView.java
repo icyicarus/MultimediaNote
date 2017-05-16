@@ -98,7 +98,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         switch (v.getId()) {
             case R.id.button_add_note:
                 noteFragment = new FragmentNote();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, noteFragment).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, noteFragment, TAG_FRAGMENT_NOTE).addToBackStack(null).commit();
                 break;
             case R.id.button_add_photo:
                 f = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
@@ -219,6 +219,19 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         }
     }
 
+    private String latestTag() {
+        List<Fragment> list = getSupportFragmentManager().getFragments();
+        return list.get(list.size() - 1).getTag();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<Fragment> list = getSupportFragmentManager().getFragments();
+        if (list.get(list.size() - 1).getTag().equals(TAG_FRAGMENT_NOTE))
+            noteFragment = (FragmentNote) list.get(list.size() - 1);
+    }
+
     @Override
     public void onBackPressed() {
         if (showToolbar) {
@@ -279,7 +292,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         AndPermission.onRequestPermissionsResult(requestCode, permissions, grantResults, new PermissionListener() {
             @Override
             public void onSucceed(int requestCode, List<String> grantPermissions) {
-
+                findViewById(R.id.button_add_audio).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -295,8 +308,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         super.onActivityResult(requestCode, resultCode, data);
         showToolbar = false;
         fabToolbarLayout.hide();
-        if (resultCode == RESULT_OK) {
-            if (noteFragment == null) {
+        if (!latestTag().equals(TAG_FRAGMENT_NOTE)) { // main fragment
+            if (resultCode == RESULT_OK) {
                 AdapterNoteList adapter = (AdapterNoteList) defaultFragment.getNoteList().getAdapter();
                 SQLiteDatabase readDatabase = (new NoteDB(this)).getReadableDatabase();
                 SQLiteDatabase writeDatabase = (new NoteDB(this)).getWritableDatabase();
@@ -339,14 +352,24 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                     adapter.notifyItemChanged(adapter.getItemCount() - 1);
                 }
                 c.close();
-            } else {
-                AdapterMediaList adapter = (AdapterMediaList) noteFragment.getMediaList().getAdapter();
-                MediaContent media = new MediaContent(f.getAbsolutePath());
-                adapter.getMediaList().add(media);
-                adapter.notifyItemInserted(adapter.getMediaList().size());
-                noteFragment.getOperationQueue().add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
             }
-        } else if (requestCode != MEDIA_TYPE_PHOTO && !f.delete())
-            Logger.e("Failed to delete some file");
+        } else { // note fragment
+            switch (requestCode) {
+                case MEDIA_TYPE_PHOTO:
+                case MEDIA_TYPE_VIDEO:
+                case MEDIA_TYPE_AUDIO:
+                    if (resultCode == RESULT_OK) {
+                        AdapterMediaList adapter = (AdapterMediaList) noteFragment.getMediaList().getAdapter();
+                        MediaContent media = new MediaContent(f.getAbsolutePath());
+                        adapter.getMediaList().add(media);
+                        adapter.notifyItemInserted(adapter.getMediaList().size());
+                        noteFragment.getOperationQueue().add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
+                    } else if (!f.delete())
+                        Logger.e("Failed to delete some file");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
