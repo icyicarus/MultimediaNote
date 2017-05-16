@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'IcarusKey'
+            keyPassword 'xiaoyan9312100.0'
+            storeFile file('D:/Google Drive/IcarusKey.jks')
+            storePassword 'xiaoyan9312100.0'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -15,6 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -38,7 +47,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:10.2.1'
     compile 'com.google.android.gms:play-services-location:10.2.1'
     //    testCompile 'junit:junit:4.12'
-
     compile 'com.github.medyo:android-about-page:1.1.1'
     compile 'com.orhanobut:logger:1.15'
     compile 'com.jakewharton:butterknife:8.5.1'
@@ -49,7 +57,6 @@ dependencies {
     compile 'com.code-troopers.betterpickers:library:3.1.0'
     compile 'com.github.adrielcafe:AndroidAudioRecorder:0.3.0'
     compile 'com.github.fafaldo:fab-toolbar:1.2.0'
-
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
