@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="icyicarus.gwu.com.multimedianote.fragments.FragmentNote">
+    tools:context="com.icyicarus.multimedianote.fragments.FragmentNote">
 
     <android.support.v7.widget.LinearLayoutCompat
         android:id="@+id/container_note_view_title"

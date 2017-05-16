@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="icyicarus.gwu.com.multimedianote">
+          package="com.icyicarus.multimedianote">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -23,7 +23,7 @@
             android:value="AIzaSyDUdAa0x3UVJiVqp3U7TSRbOo8seaAvFRA"/>
 
         <activity
-            android:name=".views.LaunchView"
+            android:name="com.icyicarus.multimedianote.views.LaunchView"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -33,30 +33,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.FragmentContainerView"
+            android:name="com.icyicarus.multimedianote.views.FragmentContainerView"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
-            android:name=".views.MapView"
+            android:name="com.icyicarus.multimedianote.views.MapView"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="icyicarus.gwu.com.multimedianote.views.FragmentContainerView"
+            android:authorities="com.icyicarus.com.multimedianote.views.FragmentContainerView"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"/>
         </provider>
 
-        <receiver android:name=".receivers.BootReceiver">
+        <receiver android:name="com.icyicarus.multimedianote.receivers.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.AlarmReceiver"/>
+        <receiver android:name="com.icyicarus.multimedianote.receivers.AlarmReceiver"/>
     </application>
 
 </manifest>
