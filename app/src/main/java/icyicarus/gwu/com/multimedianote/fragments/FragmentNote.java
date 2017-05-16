@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.github.fafaldo.fabtoolbar.widget.FABToolbarLayout;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
@@ -68,6 +69,7 @@ public class FragmentNote extends Fragment {
             getActivity().setTitle(noteData.getTitle());
         }
         showOKButton = getActivity().getPreferences(Context.MODE_PRIVATE).getBoolean(Variables.SOB, false);
+        ((FABToolbarLayout) getActivity().findViewById(R.id.fab_toolbar)).hide();
     }
 
     @Override

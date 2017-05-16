@@ -94,6 +94,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     private MenuItem activeMenu;
     private boolean showToolbar = false;
     private File f;
+    private FragmentAllNotes defaultFragment = null;
+    private FragmentNote noteFragment = null;
 
     @OnClick({R.id.button_add_note, R.id.button_add_photo, R.id.button_add_video, R.id.button_add_audio})
     void fabClickListener(View v) {
@@ -101,7 +103,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         Intent i;
         switch (v.getId()) {
             case R.id.button_add_note:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
+                noteFragment = new FragmentNote();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, noteFragment).addToBackStack(null).commit();
                 break;
             case R.id.button_add_photo:
                 f = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
@@ -141,24 +144,6 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         }
     }
 
-    private String getLatestTag() {
-        List<Fragment> list = getSupportFragmentManager().getFragments();
-        return list.get(list.size() - 1).getTag();
-    }
-
-    private FragmentNote getLatestFragment() {
-        List<Fragment> list = getSupportFragmentManager().getFragments();
-        return (FragmentNote) list.get(list.size() - 1);
-    }
-
-    private FragmentAllNotes getAllNoteFragment() {
-        List<Fragment> list = getSupportFragmentManager().getFragments();
-        for (Fragment f : list)
-            if (f.getTag().equals(TAG_FRAGMENT_ALL_NOTE))
-                return (FragmentAllNotes) f;
-        return (FragmentAllNotes) list.get(0);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -186,7 +171,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         editor.apply();
         editor.commit();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAllNotes(), TAG_FRAGMENT_ALL_NOTE).commit();
+        defaultFragment = new FragmentAllNotes();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, defaultFragment, TAG_FRAGMENT_ALL_NOTE).commit();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -252,6 +238,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                     super.onBackPressed();
                 } else {
                     getSupportFragmentManager().popBackStack();
+                    noteFragment = null;
                     activeMenu = null;
                     navigationView.setCheckedItem(R.id.nav_all_notes);
                 }
@@ -314,8 +301,8 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         super.onActivityResult(requestCode, resultCode, data);
         fabToolbarLayout.hide();
         if (resultCode == RESULT_OK) {
-            if (!getLatestTag().equals(TAG_FRAGMENT_NOTE)) {
-                AdapterNoteList adapter = (AdapterNoteList) getAllNoteFragment().getNoteList().getAdapter();
+            if (noteFragment == null) {
+                AdapterNoteList adapter = (AdapterNoteList) defaultFragment.getNoteList().getAdapter();
                 SQLiteDatabase readDatabase = (new NoteDB(this)).getReadableDatabase();
                 SQLiteDatabase writeDatabase = (new NoteDB(this)).getWritableDatabase();
                 String today = new SimpleDateFormat("yyyy-MM-dd%", Locale.getDefault()).format(new Date(System.currentTimeMillis()));
@@ -358,11 +345,11 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                 }
                 c.close();
             } else {
-                AdapterMediaList adapter = (AdapterMediaList) getLatestFragment().getMediaList().getAdapter();
+                AdapterMediaList adapter = (AdapterMediaList) noteFragment.getMediaList().getAdapter();
                 MediaContent media = new MediaContent(f.getAbsolutePath());
                 adapter.getMediaList().add(media);
                 adapter.notifyItemInserted(adapter.getMediaList().size());
-                getLatestFragment().getOperationQueue().add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
+                noteFragment.getOperationQueue().add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
             }
         } else if (requestCode != MEDIA_TYPE_PHOTO && !f.delete())
             Logger.e("Failed to delete some file");
