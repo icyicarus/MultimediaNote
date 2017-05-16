@@ -8,14 +8,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -29,6 +25,7 @@ import android.widget.EditText;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
+import com.orhanobut.logger.Logger;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.io.File;
@@ -39,15 +36,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
-import cafe.adriel.androidaudiorecorder.model.AudioChannel;
-import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
-import cafe.adriel.androidaudiorecorder.model.AudioSource;
 import icyicarus.gwu.com.multimedianote.FontManager;
 import icyicarus.gwu.com.multimedianote.NoteDB;
 import icyicarus.gwu.com.multimedianote.R;
@@ -57,66 +48,15 @@ import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
 import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
 import icyicarus.gwu.com.multimedianote.receivers.AlarmReceiver;
 
-import static android.app.Activity.RESULT_OK;
 import static icyicarus.gwu.com.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_AUDIO;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_PHOTO;
-import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_VIDEO;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_NOTE;
 
 public class FragmentAllNotes extends Fragment {
 
     @BindView(R.id.note_list) RecyclerView noteList;
-    @BindView(R.id.snackbar_container_all_note) CoordinatorLayout snackbarContainer;
 
     private CalendarDay calendarDay;
     private String queryDate;
-    private File f;
-
-    @OnClick({R.id.button_all_note_add_note, R.id.button_all_note_add_photo, R.id.button_all_note_add_video, R.id.button_all_note_add_audio})
-    void allNoteViewButtonClick(View v) {
-        Uri uri;
-        Intent i;
-        switch (v.getId()) {
-            case R.id.button_all_note_add_note:
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
-                break;
-            case R.id.button_all_note_add_photo:
-                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
-                uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
-                i = new Intent();
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                i.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(i, MEDIA_TYPE_PHOTO);
-                break;
-            case R.id.button_all_note_add_video:
-                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".mp4");
-                uri = FileProvider.getUriForFile(getContext(), FILE_PROVIDER_AUTHORITIES, f);
-                i = new Intent();
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                i.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
-                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(i, MEDIA_TYPE_VIDEO);
-                break;
-            case R.id.button_all_note_add_audio:
-                f = new File(getContext().getExternalFilesDir(null), System.currentTimeMillis() + ".wav");
-                Random rnd = new Random();
-                int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
-                AndroidAudioRecorder.with(this)
-                        .setFilePath(f.getAbsolutePath())
-                        .setColor(color)
-                        .setRequestCode(MEDIA_TYPE_AUDIO)
-                        .setSource(AudioSource.MIC)
-                        .setChannel(AudioChannel.STEREO)
-                        .setSampleRate(AudioSampleRate.HZ_48000)
-                        .setAutoStart(false)
-                        .setKeepDisplayOn(true)
-                        .recordFromFragment();
-                break;
-            default:
-                break;
-        }
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -305,7 +245,7 @@ public class FragmentAllNotes extends Fragment {
                 bundle.putSerializable(Variables.EXTRA_NOTE_DATA, noteContent);
                 Fragment fragment = new FragmentNote();
                 fragment.setArguments(bundle);
-                getFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment).addToBackStack(null).commit();
+                getFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment, TAG_FRAGMENT_NOTE).addToBackStack(null).commit();
             }
         });
         noteList.setAdapter(adapterNoteList);
@@ -315,6 +255,7 @@ public class FragmentAllNotes extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        getActivity().findViewById(R.id.button_add_note).setVisibility(View.VISIBLE);
         if (calendarDay != null)
             getActivity().setTitle("All Notes on " + calendarDay.getYear() + "-" + (calendarDay.getMonth() + 1) + "-" + calendarDay.getDay());
         else
@@ -329,17 +270,8 @@ public class FragmentAllNotes extends Fragment {
         File file;
         for (MediaContent media : mediaList) {
             file = new File(media.path);
-            if (!file.delete()) {
-                final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
-                snackbar.setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        snackbar.dismiss();
-                    }
-                }).setActionTextColor(Color.WHITE);
-                snackbar.setText("Some media files are not deleted, please delete them manually");
-                snackbar.show();
-            }
+            if (!file.delete())
+                Logger.e("Some media files are not deleted, please delete them manually");
         }
         AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
         Cursor c = writeDatabase.query(NoteDB.TABLE_NAME_ALARM, null, NoteDB.COLUMN_NAME_ALARM_NOTEID + "=?", new String[]{note.getId() + ""}, null, null, null, null);
@@ -351,62 +283,7 @@ public class FragmentAllNotes extends Fragment {
         c.close();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            AdapterNoteList adapter = (AdapterNoteList) noteList.getAdapter();
-            SQLiteDatabase readDatabase = (new NoteDB(getContext())).getReadableDatabase();
-            SQLiteDatabase writeDatabase = (new NoteDB(getContext())).getWritableDatabase();
-            String today = new SimpleDateFormat("yyyy-MM-dd%", Locale.getDefault()).format(new Date(System.currentTimeMillis()));
-            Cursor c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, "date like ?", new String[]{today}, null, null, null, null);
-            int ownerId = -1;
-            while (c.moveToNext())
-                ownerId = (int) c.getLong(c.getColumnIndex(NoteDB.COLUMN_ID));
-            if (ownerId == -1) { // no today note
-                ContentValues cv = new ContentValues();
-                cv.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Quick Note");
-                cv.put(NoteDB.COLUMN_NAME_NOTE_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
-                ownerId = (int) writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, cv);
-                cv = new ContentValues();
-                cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
-                cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
-                writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
-                LinkedList<MediaContent> list = new LinkedList<>();
-                list.add(new MediaContent(f.getAbsolutePath()));
-                NoteContent newNote = new NoteContent(
-                        ownerId,
-                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)),
-                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_DATE)),
-                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT)),
-                        list,
-                        requestCode == MEDIA_TYPE_PHOTO ? f.getAbsolutePath() : null,
-                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LATITUDE)),
-                        c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LONGITUDE))
-                );
-                adapter.getNotes().add(newNote);
-                adapter.notifyItemInserted(adapter.getItemCount() - 1);
-            } else { // have today note
-                ContentValues cv = new ContentValues();
-                cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
-                cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
-                writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
-                adapter.getNotes().get(adapter.getItemCount() - 1).getMediaList().add(new MediaContent(f.getAbsolutePath()));
-                adapter.notifyItemChanged(adapter.getItemCount() - 1);
-            }
-            c.close();
-        } else {
-            if (requestCode != MEDIA_TYPE_PHOTO && !f.delete()) {
-                final Snackbar snackbar = Snackbar.make(snackbarContainer, "", Snackbar.LENGTH_SHORT);
-                snackbar.setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        snackbar.dismiss();
-                    }
-                }).setActionTextColor(Color.WHITE);
-                snackbar.setText("File not deleted, please delete it manually");
-                snackbar.show();
-            }
-        }
+    public RecyclerView getNoteList() {
+        return noteList;
     }
 }

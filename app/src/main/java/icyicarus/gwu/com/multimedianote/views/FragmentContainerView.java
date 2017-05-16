@@ -1,36 +1,61 @@
 package icyicarus.gwu.com.multimedianote.views;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.github.fafaldo.fabtoolbar.widget.FABToolbarLayout;
 import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.PermissionListener;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
+import cafe.adriel.androidaudiorecorder.model.AudioChannel;
+import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
+import cafe.adriel.androidaudiorecorder.model.AudioSource;
+import icyicarus.gwu.com.multimedianote.FontManager;
+import icyicarus.gwu.com.multimedianote.NoteDB;
+import icyicarus.gwu.com.multimedianote.OperationDetail;
 import icyicarus.gwu.com.multimedianote.R;
-import icyicarus.gwu.com.multimedianote.Variables;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAbout;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAlarm;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentAllNotes;
@@ -38,12 +63,101 @@ import icyicarus.gwu.com.multimedianote.fragments.FragmentCalendar;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentFeedback;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentNote;
 import icyicarus.gwu.com.multimedianote.fragments.FragmentSettings;
+import icyicarus.gwu.com.multimedianote.medialist.AdapterMediaList;
+import icyicarus.gwu.com.multimedianote.medialist.MediaContent;
+import icyicarus.gwu.com.multimedianote.notelist.AdapterNoteList;
+import icyicarus.gwu.com.multimedianote.notelist.NoteContent;
+
+import static icyicarus.gwu.com.multimedianote.Variables.BGC;
+import static icyicarus.gwu.com.multimedianote.Variables.CBG;
+import static icyicarus.gwu.com.multimedianote.Variables.EXTRA_NOTE_DATA;
+import static icyicarus.gwu.com.multimedianote.Variables.FILE_PROVIDER_AUTHORITIES;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_AUDIO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_PHOTO;
+import static icyicarus.gwu.com.multimedianote.Variables.MEDIA_TYPE_VIDEO;
+import static icyicarus.gwu.com.multimedianote.Variables.SOB;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_ABOUT;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_ALARM;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_ALL_NOTE;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_CALENDAR;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_FEEDBACK;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_NOTE;
+import static icyicarus.gwu.com.multimedianote.Variables.TAG_FRAGMENT_SETTINGS;
 
 public class FragmentContainerView extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.nav_view) NavigationView navigationView;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.fab_toolbar_fab) FloatingActionButton floatingActionButton;
+    @BindView(R.id.fab_toolbar) FABToolbarLayout fabToolbarLayout;
+    @BindView(R.id.button_add_audio) AppCompatButton buttonAddAudio;
 
-    MenuItem activeMenu;
+    private MenuItem activeMenu;
+    private boolean showToolbar = false;
+    private File f;
+
+    @OnClick({R.id.button_add_note, R.id.button_add_photo, R.id.button_add_video, R.id.button_add_audio})
+    void fabClickListener(View v) {
+        Uri uri;
+        Intent i;
+        switch (v.getId()) {
+            case R.id.button_add_note:
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentNote()).addToBackStack(null).commit();
+                break;
+            case R.id.button_add_photo:
+                f = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
+                uri = FileProvider.getUriForFile(getApplicationContext(), FILE_PROVIDER_AUTHORITIES, f);
+                i = new Intent();
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                i.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(i, MEDIA_TYPE_PHOTO);
+                break;
+            case R.id.button_add_video:
+                f = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".mp4");
+                uri = FileProvider.getUriForFile(getApplicationContext(), FILE_PROVIDER_AUTHORITIES, f);
+                i = new Intent();
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                i.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(i, MEDIA_TYPE_VIDEO);
+                break;
+            case R.id.button_add_audio:
+                f = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".wav");
+                Random rnd = new Random();
+                int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                AndroidAudioRecorder.with(this)
+                        .setFilePath(f.getAbsolutePath())
+                        .setColor(color)
+                        .setRequestCode(MEDIA_TYPE_AUDIO)
+                        .setSource(AudioSource.MIC)
+                        .setChannel(AudioChannel.STEREO)
+                        .setSampleRate(AudioSampleRate.HZ_48000)
+                        .setAutoStart(false)
+                        .setKeepDisplayOn(true)
+                        .recordFromFragment();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private String getLatestTag() {
+        List<Fragment> list = getSupportFragmentManager().getFragments();
+        return list.get(list.size() - 1).getTag();
+    }
+
+    private FragmentNote getLatestFragment() {
+        List<Fragment> list = getSupportFragmentManager().getFragments();
+        return (FragmentNote) list.get(list.size() - 1);
+    }
+
+    private FragmentAllNotes getAllNoteFragment() {
+        List<Fragment> list = getSupportFragmentManager().getFragments();
+        for (Fragment f : list)
+            if (f.getTag().equals(TAG_FRAGMENT_ALL_NOTE))
+                return (FragmentAllNotes) f;
+        return (FragmentAllNotes) list.get(0);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +169,24 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         setContentView(R.layout.view_user_interface);
         ButterKnife.bind(this);
 
-        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this).setDownsampleEnabled(true).build();
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(getApplicationContext()).setDownsampleEnabled(true).build();
         Fresco.initialize(getApplicationContext(), config);
+
+        Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONT_AWESOME);
+        FontManager.markAsIconContainer(findViewById(R.id.drawer_layout), iconFont);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("All Notes");
         SharedPreferences userPreferences = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = userPreferences.edit();
-        editor.putBoolean(Variables.SOB, userPreferences.getBoolean(Variables.SOB, false));
-        editor.putBoolean(Variables.CBG, userPreferences.getBoolean(Variables.CBG, false));
-        editor.putString(Variables.BGC, userPreferences.getString(Variables.BGC, "000000"));
+        editor.putBoolean(SOB, userPreferences.getBoolean(SOB, false));
+        editor.putBoolean(CBG, userPreferences.getBoolean(CBG, false));
+        editor.putString(BGC, userPreferences.getString(BGC, "000000"));
         editor.apply();
         editor.commit();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAllNotes()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAllNotes(), TAG_FRAGMENT_ALL_NOTE).commit();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -94,44 +211,56 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                     )
                     .send();
         processIntent(getIntent());
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fabToolbarLayout.show();
+                showToolbar = true;
+            }
+        });
+
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+            buttonAddAudio.setVisibility(View.GONE);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Logger.e("container new intent");
         processIntent(intent);
     }
 
     private void processIntent(Intent intent) {
-        Bundle bundle = intent.getBundleExtra(Variables.EXTRA_NOTE_DATA);
+        Bundle bundle = intent.getBundleExtra(EXTRA_NOTE_DATA);
         if (bundle != null) {
-            Logger.e("bundle not null");
             Fragment fragment = new FragmentNote();
             fragment.setArguments(bundle);
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment).addToBackStack(null).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, fragment, TAG_FRAGMENT_NOTE).addToBackStack(null).commit();
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (showToolbar) {
+            showToolbar = false;
+            fabToolbarLayout.hide();
         } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                super.onBackPressed();
-            } else {
-//                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                getSupportFragmentManager().popBackStack();
-                activeMenu = null;
-                navigationView.setCheckedItem(R.id.nav_all_notes);
+            if (drawer.isDrawerOpen(GravityCompat.START))
+                drawer.closeDrawer(GravityCompat.START);
+            else {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    super.onBackPressed();
+                } else {
+                    getSupportFragmentManager().popBackStack();
+                    activeMenu = null;
+                    navigationView.setCheckedItem(R.id.nav_all_notes);
+                }
             }
         }
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
         if (activeMenu != item) {
             if (activeMenu != null)
                 activeMenu.setChecked(false);
@@ -142,19 +271,19 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         switch (id) {
             case R.id.nav_calendar:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentCalendar()).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentCalendar(), TAG_FRAGMENT_CALENDAR).addToBackStack(null).commit();
                 break;
             case R.id.nav_alarm:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAlarm()).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAlarm(), TAG_FRAGMENT_ALARM).addToBackStack(null).commit();
                 break;
             case R.id.nav_settings:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings()).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentSettings(), TAG_FRAGMENT_SETTINGS).addToBackStack(null).commit();
                 break;
             case R.id.nav_help_and_feedback:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentFeedback()).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentFeedback(), TAG_FRAGMENT_FEEDBACK).addToBackStack(null).commit();
                 break;
             case R.id.nav_about:
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAbout()).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, new FragmentAbout(), TAG_FRAGMENT_ABOUT).addToBackStack(null).commit();
                 break;
             case R.id.nav_all_notes:
             default:
@@ -166,7 +295,6 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         AndPermission.onRequestPermissionsResult(requestCode, permissions, grantResults, new PermissionListener() {
             @Override
             public void onSucceed(int requestCode, List<String> grantPermissions) {
@@ -179,5 +307,64 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        fabToolbarLayout.hide();
+        if (resultCode == RESULT_OK) {
+            if (!getLatestTag().equals(TAG_FRAGMENT_NOTE)) {
+                AdapterNoteList adapter = (AdapterNoteList) getAllNoteFragment().getNoteList().getAdapter();
+                SQLiteDatabase readDatabase = (new NoteDB(this)).getReadableDatabase();
+                SQLiteDatabase writeDatabase = (new NoteDB(this)).getWritableDatabase();
+                String today = new SimpleDateFormat("yyyy-MM-dd%", Locale.getDefault()).format(new Date(System.currentTimeMillis()));
+                Cursor c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, "date like ?", new String[]{today}, null, null, null, null);
+                int ownerId = -1;
+                while (c.moveToNext())
+                    ownerId = (int) c.getLong(c.getColumnIndex(NoteDB.COLUMN_ID));
+                if (ownerId == -1) { // no today note
+                    ContentValues cv = new ContentValues();
+                    cv.put(NoteDB.COLUMN_NAME_NOTE_TITLE, "Quick Note");
+                    cv.put(NoteDB.COLUMN_NAME_NOTE_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+                    ownerId = (int) writeDatabase.insert(NoteDB.TABLE_NAME_NOTES, null, cv);
+                    cv = new ContentValues();
+                    cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
+                    cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
+                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+                    LinkedList<MediaContent> list = new LinkedList<>();
+                    list.add(new MediaContent(f.getAbsolutePath()));
+                    c = readDatabase.query(NoteDB.TABLE_NAME_NOTES, null, "_id=?", new String[]{ownerId + ""}, null, null, null, null);
+                    c.moveToNext();
+                    NoteContent newNote = new NoteContent(
+                            ownerId,
+                            c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_TITLE)),
+                            c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_DATE)),
+                            c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_CONTENT)),
+                            list,
+                            requestCode == MEDIA_TYPE_PHOTO ? f.getAbsolutePath() : null,
+                            c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LATITUDE)),
+                            c.getString(c.getColumnIndex(NoteDB.COLUMN_NAME_NOTE_LONGITUDE))
+                    );
+                    adapter.getNotes().add(newNote);
+                    adapter.notifyItemInserted(adapter.getItemCount() - 1);
+                } else { // have today note
+                    ContentValues cv = new ContentValues();
+                    cv.put(NoteDB.COLUMN_NAME_MEDIA_PATH, f.getAbsolutePath());
+                    cv.put(NoteDB.COLUMN_NAME_MEDIA_OWNER_NOTE_ID, ownerId);
+                    writeDatabase.insert(NoteDB.TABLE_NAME_MEDIA, null, cv);
+                    adapter.getNotes().get(adapter.getItemCount() - 1).getMediaList().add(new MediaContent(f.getAbsolutePath()));
+                    adapter.notifyItemChanged(adapter.getItemCount() - 1);
+                }
+                c.close();
+            } else {
+                AdapterMediaList adapter = (AdapterMediaList) getLatestFragment().getMediaList().getAdapter();
+                MediaContent media = new MediaContent(f.getAbsolutePath());
+                adapter.getMediaList().add(media);
+                adapter.notifyItemInserted(adapter.getMediaList().size());
+                getLatestFragment().getOperationQueue().add(new OperationDetail(OperationDetail.OPERATION_ADD, media));
+            }
+        } else if (requestCode != MEDIA_TYPE_PHOTO && !f.delete())
+            Logger.e("Failed to delete some file");
     }
 }

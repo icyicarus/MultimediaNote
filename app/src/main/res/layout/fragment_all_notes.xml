@@ -11,44 +11,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <android.support.v7.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom">
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/button_all_note_add_note"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="&#xf067;"/>
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/button_all_note_add_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="&#xf030;"/>
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/button_all_note_add_video"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="&#xf03d;"/>
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/button_all_note_add_audio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="&#xf130;"/>
-    </android.support.v7.widget.LinearLayoutCompat>
-
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/snackbar_container_all_note"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
 </RelativeLayout>

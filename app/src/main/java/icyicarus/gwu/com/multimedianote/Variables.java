@@ -18,4 +18,12 @@ public class Variables {
     public static final int MEDIA_TYPE_AUDIO = 8003;
 
     public static final String FILE_PROVIDER_AUTHORITIES = BuildConfig.APPLICATION_ID + ".views.FragmentContainerView";
+
+    public static final String TAG_FRAGMENT_ALL_NOTE = "ALL_NOTE";
+    public static final String TAG_FRAGMENT_NOTE = "NOTE";
+    public static final String TAG_FRAGMENT_CALENDAR = "CALENDAR";
+    public static final String TAG_FRAGMENT_ALARM = "ALARM";
+    public static final String TAG_FRAGMENT_SETTINGS = "SETTINGS";
+    public static final String TAG_FRAGMENT_FEEDBACK = "FEEDBACK";
+    public static final String TAG_FRAGMENT_ABOUT = "ABOUT";
 }

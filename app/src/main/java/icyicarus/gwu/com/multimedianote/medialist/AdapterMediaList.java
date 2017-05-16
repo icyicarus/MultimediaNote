@@ -80,4 +80,8 @@ public class AdapterMediaList extends RecyclerView.Adapter<ViewHolderMediaList> 
     public void setOnMediaDeleteListener(DeleteMediaListener listener) {
         this.deleteListener = listener;
     }
+
+    public List<MediaContent> getMediaList() {
+        return mediaList;
+    }
 }

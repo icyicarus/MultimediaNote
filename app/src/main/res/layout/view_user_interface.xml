@@ -36,13 +36,76 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context="icyicarus.gwu.com.multimedianote.views.FragmentContainerView"/>
 
-        <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/fab"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom|end"-->
-        <!--android:layout_margin="@dimen/fab_margin"-->
-        <!--app:srcCompat="@android:drawable/ic_dialog_email" />-->
+        <com.github.fafaldo.fabtoolbar.widget.FABToolbarLayout
+            android:id="@+id/fab_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:containerId="@+id/fab_toolbar_container"
+            app:fabId="@+id/fab_toolbar_fab"
+            app:fabToolbarId="@+id/fab_toolbar_toolbar"
+            app:fadeInFraction="0.2"
+            app:hideDuration="600"
+            app:horizontalMargin="30dp"
+            app:showDuration="600"
+            app:verticalMargin="30dp">
+
+            <RelativeLayout
+                android:id="@id/fab_toolbar_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@id/fab_toolbar_fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_assignment"
+                    app:borderWidth="0dp"
+                    app:fabSize="normal"/>
+
+            </RelativeLayout>
+
+            <android.support.v7.widget.LinearLayoutCompat
+                android:id="@id/fab_toolbar_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/button_add_note"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="&#xf067;"
+                    android:textColor="#ffffff"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/button_add_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="&#xf030;"
+                    android:textColor="#ffffff"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/button_add_video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="&#xf03d;"
+                    android:textColor="#ffffff"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/button_add_audio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="&#xf130;"
+                    android:textColor="#ffffff"/>
+
+            </android.support.v7.widget.LinearLayoutCompat>
+
+        </com.github.fafaldo.fabtoolbar.widget.FABToolbarLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 
