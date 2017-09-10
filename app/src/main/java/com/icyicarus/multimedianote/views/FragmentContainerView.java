@@ -2,6 +2,7 @@ package com.icyicarus.multimedianote.views;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -57,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Stack;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -90,6 +92,7 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     private File f;
     private FragmentAllNotes defaultFragment = null;
     private FragmentNote noteFragment = null;
+    private Stack<Fragment> fragmentStack = null;
 
     @OnClick({R.id.button_add_note, R.id.button_add_photo, R.id.button_add_video, R.id.button_add_audio})
     void fabClickListener(View v) {
@@ -164,6 +167,20 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
 //        editor.putString(BGC, userPreferences.getString(BGC, "000000"));
 //        editor.apply();
 //        editor.commit();
+        fragmentStack = new Stack<>();
+        getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentAttached(FragmentManager fm, Fragment f, Context context) {
+                super.onFragmentAttached(fm, f, context);
+                if (f != null) fragmentStack.push(f);
+            }
+
+            @Override
+            public void onFragmentDetached(FragmentManager fm, Fragment f) {
+                super.onFragmentDetached(fm, f);
+                if (f != null) fragmentStack.pop();
+            }
+        }, false);
 
         defaultFragment = new FragmentAllNotes();
         getSupportFragmentManager().beginTransaction().replace(R.id.content_user_interface, defaultFragment, TAG_FRAGMENT_ALL_NOTE).commit();
@@ -220,16 +237,19 @@ public class FragmentContainerView extends AppCompatActivity implements Navigati
     }
 
     private String latestTag() {
-        List<Fragment> list = getSupportFragmentManager().getFragments();
-        return list.get(list.size() - 1).getTag();
+//        List<Fragment> list = getSupportFragmentManager().getFragments();
+//        return list.get(list.size() - 1).getTag();
+        return fragmentStack.peek().getTag();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        List<Fragment> list = getSupportFragmentManager().getFragments();
-        if (list.get(list.size() - 1).getTag().equals(TAG_FRAGMENT_NOTE))
-            noteFragment = (FragmentNote) list.get(list.size() - 1);
+//        List<Fragment> list = getSupportFragmentManager().getFragments();
+//        if (list.get(list.size() - 1).getTag().equals(TAG_FRAGMENT_NOTE))
+//            noteFragment = (FragmentNote) list.get(list.size() - 1);
+        if (fragmentStack.peek().getTag().equals(TAG_FRAGMENT_NOTE))
+            noteFragment = (FragmentNote) fragmentStack.peek();
     }
 
     @Override

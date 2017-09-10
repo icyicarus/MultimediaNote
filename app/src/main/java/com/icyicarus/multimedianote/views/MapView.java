@@ -80,7 +80,7 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
         extraLatitude = getIntent().getStringExtra(Variables.EXTRA_NOTE_LATITUDE);
         extraLongitude = getIntent().getStringExtra(Variables.EXTRA_NOTE_LONGITUDE);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentGoogleMap);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map_note);
         mapFragment.getMapAsync(MapView.this);
 
         try {
@@ -153,7 +153,7 @@ public class MapView extends FragmentActivity implements OnMapReadyCallback, Goo
         mGoogleMap.setOnMarkerDragListener(MapView.this);
         mGoogleMap.setPadding(0, 150, 0, 0);
         if (mGoogleMap != null) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 AndPermission.with(MapView.this).requestCode(1).permission(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION).send();
             } else {
                 if (oldMarker != null) {
